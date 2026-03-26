@@ -88,13 +88,13 @@ LEAK_SITES = [
         "url": "http://ijzn3sicrcy3nfghfbqznvfiwjnxp3tqkkgbvyf4bhwcrbz3hmsqlbad.onion",
         "parser": "generic",
     },
-    # ── INC Ransom ── (CISA Advisory 2024) — URL pending verification
-    # {
-    #     "group": "incransom",
-    #     "display": "INC Ransom",
-    #     "url": "",  # original URL contained corrupted Cyrillic characters; needs correct address
-    #     "parser": "generic",
-    # },
+    # ── INC Ransom ── (CISA Advisory 2024; URL sourced from ransomwatch)
+    {
+        "group": "incransom",
+        "display": "INC Ransom",
+        "url": "http://incblog6qu4y4mm4zvw5nrmue6qbwtgjsxpw6b7ixzssu36tsajldoad.onion",
+        "parser": "generic",
+    },
     # ── DragonForce ── (Unit42 report 2024)
     {
         "group": "dragonforce",
@@ -108,6 +108,97 @@ LEAK_SITES = [
         "display": "LockBit 3.0",
         "url": "http://lockbit3753ekp7tf.onion",
         "parser": "lockbit",
+    },
+    # ── BlackSuit ── (Royal ransomware successor; CISA Advisory AA23-061A update 2024)
+    {
+        "group": "blacksuit",
+        "display": "BlackSuit",
+        "url": "http://weg7sdx54bevnvulapqu6bpzwztryeflq3s23tegbmnhkbpqz637f2yd.onion",
+        "parser": "generic",
+    },
+    # ── Cicada3301 ── (ESET/Truesec reports 2024; Rust-based, ALPHV-linked)
+    {
+        "group": "cicada3301",
+        "display": "Cicada3301",
+        "url": "http://cicadabv7vicyvgz5khl7v2x5yygcgow7ryy6yppwmxii4eoobdaztqd.onion",
+        "parser": "generic",
+    },
+    # ── Embargo ── (Rust-based; Unit42/Sophos reports 2024)
+    {
+        "group": "embargo",
+        "display": "Embargo",
+        "url": "http://embargobe3n5okxyzqphpmk3moinoap2snz5k6765mvtkk7hhi544jid.onion",
+        "parser": "generic",
+    },
+    # ── Fog ── (Sophos/Unit42 reports 2024-2025; education/VPN-focused)
+    {
+        "group": "fog",
+        "display": "Fog",
+        "url": "http://xql562evsy7njcsngacphc2erzjfecwotdkobn3m4uxu2gtqh26newid.onion",
+        "parser": "generic",
+    },
+    # ── Interlock ── (Cisco Talos/Sekoia reports 2024-2025; FreeBSD-targeting)
+    {
+        "group": "interlock",
+        "display": "Interlock",
+        "url": "http://ebhmkoohccl45qesdbvrjqtyro2hmhkmh6vkyfyjjzfllm3ix72aqaid.onion",
+        "parser": "generic",
+    },
+    # ── ThreeAM ── (Symantec/Broadcom report 2023-2024; Rust-based, LockBit-adjacent)
+    {
+        "group": "threeam",
+        "display": "ThreeAM",
+        "url": "http://threeamkelxicjsaf2czjyz2lc4q3ngqkxhhlexyfcp2o6raw4rphyad.onion",
+        "parser": "generic",
+    },
+    # ── Termite ── (Mandiant/CrowdStrike reports 2024; Blue Yonder supply chain incident)
+    {
+        "group": "termite",
+        "display": "Termite",
+        "url": "http://termiteuslbumdge2zmfmfcsrvmvsfe4gvyudc5j6cdnisnhtftvokid.onion",
+        "parser": "generic",
+    },
+    # ── 8Base ── (VMware Carbon Black/Sophos reports 2023-2024; double-extortion)
+    {
+        "group": "8base",
+        "display": "8Base",
+        "url": "http://xb6q2aggycmlcrjtbjendcnnwpmmwbosqaugxsqb4nx6cmod3emy7sad.onion",
+        "parser": "generic",
+    },
+    # ── Everest ── (long-running group; multiple vendor reports 2022-2025)
+    {
+        "group": "everest",
+        "display": "Everest",
+        "url": "http://ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.onion",
+        "parser": "generic",
+    },
+    # ── BrainCipher ── (active since mid-2024; targeted Indonesia PDNS)
+    {
+        "group": "braincipher",
+        "display": "BrainCipher",
+        "url": "http://vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd.onion",
+        "parser": "generic",
+    },
+    # ── RansomHouse ── (data-theft only, no encryption; active since 2022)
+    {
+        "group": "ransomhouse",
+        "display": "RansomHouse",
+        "url": "http://zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid.onion",
+        "parser": "generic",
+    },
+    # ── Abyss Locker ── (Linux/ESXi targeting; active 2023-2025)
+    {
+        "group": "abyss",
+        "display": "Abyss Locker",
+        "url": "http://3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.onion",
+        "parser": "generic",
+    },
+    # ── Sarcoma ── (active since Q4 2024; multiple sectors)
+    {
+        "group": "sarcoma",
+        "display": "Sarcoma",
+        "url": "http://sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.onion",
+        "parser": "generic",
     },
 ]
 
