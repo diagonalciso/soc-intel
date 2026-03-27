@@ -25,6 +25,7 @@ from app.connectors.builtin.nvd_epss import NVDEPSSConnector
 from app.connectors.builtin.otx_import import OTXImportConnector
 from app.connectors.builtin.misp_feeds import MISPFeedsConnector
 from app.connectors.builtin.taxii_import import TAXIIImportConnector
+from app.connectors.builtin.sigma_rules import SigmaRulesConnector
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,7 @@ CONNECTORS = [
     CISAKEVConnector(),
     NVDEPSSConnector(),
     MITREAttackConnector(),
+    SigmaRulesConnector(),
 ]
 
 # Apply reliability overrides
