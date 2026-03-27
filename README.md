@@ -9,13 +9,16 @@ CLAWINT combines indicator management, dark web tracking, case management, enric
 ## Features
 
 - **STIX 2.1 native** — all threat objects stored and exchanged as STIX 2.1
-- **20 built-in connectors** — abuse.ch, OTX, MISP feeds, TAXII, CISA KEV, NVD, MITRE ATT&CK, ransomware trackers, and more
+- **22 built-in connectors** — abuse.ch, OTX, MISP feeds, TAXII, CISA KEV, NVD, MITRE ATT&CK, Sigma rules, ransomware trackers, and more
 - **Dark web as first-class** — Tor-based ransomware leak site scraping, victim tracking, IAB listings, credential exposures, stealer logs
-- **IOC deduplication** — deterministic indicator IDs (UUID5 of type:value) prevent duplicates across 20 sources
+- **IOC deduplication** — deterministic indicator IDs (UUID5 of type:value) prevent duplicates across all import sources
 - **FP suppression** — MISP warning lists filter top-1000 domains, CDN ranges, cloud IPs before storage
-- **Indicator decay** — confidence auto-reduces over time; revokes aged IoCs after 90 days
+- **TLP marking** — every STIX object carries a canonical TLP field (CLEAR/GREEN/AMBER/AMBER+STRICT/RED); filterable in the Intel browser
+- **Source trust scoring** — per-connector reliability weight (0–100) applied to indicator confidence at ingest; CISA KEV = 95, OTX community = 65
+- **Indicator decay** — confidence auto-reduces over time; revokes aged IoCs after 90 days; sighted indicators are exempt from decay
+- **Sightings** — record when an indicator is observed in your environment; updates decay exemption and running sighting count
 - **Enrichment engine** — parallel on-demand enrichment for IPs, domains, URLs, and file hashes with risk scoring
-- **Detection rules** — YARA, Sigma, Snort, Suricata, and STIX Pattern storage with MITRE technique linkage
+- **Detection rules** — 500+ Sigma rules imported automatically; YARA, Snort, Suricata, and STIX Pattern storage with MITRE technique linkage
 - **MITRE ATT&CK heatmap** — interactive matrix showing coverage against your knowledge base
 - **Knowledge graph** — Cytoscape.js relationship graph on every STIX object
 - **Case management** — TheHive-inspired case/task/observable/alert workflow
@@ -47,7 +50,8 @@ CLAWINT combines indicator management, dark web tracking, case management, enric
 | SANS ISC DShield | isc.sans.edu | Every 12h | Free |
 | CISA KEV | cisa.gov | Every 12h | Free, official |
 | NVD + EPSS | nvd.nist.gov + first.org | Daily 04:00 | Free; optional NVD_API_KEY |
-| MITRE ATT&CK | github.com/mitre/cti | Weekly | Free, official |
+| MITRE ATT&CK | github.com/mitre/cti | Weekly Sun | Free, official |
+| Sigma Rules | SigmaHQ/sigma on GitHub | Weekly Mon | Free; Windows/Linux/network/cloud |
 
 ### Enrichment (on-demand)
 
@@ -126,13 +130,13 @@ echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 | URL | Description |
 |-----|-------------|
 | `/dashboard` | KPI cards, top ransomware groups, intel by source, recent alerts |
-| `/intel` | STIX object browser — all types, full-text search |
-| `/intel/:id` | Object detail — core fields, extended attrs, relationships table + graph |
+| `/intel` | STIX object browser — full-text search, TLP filter, type filter |
+| `/intel/:id` | Object detail — core fields, TLP badge, sighting count, Report Sighting button, relationship graph |
 | `/attack` | MITRE ATT&CK matrix heatmap with technique coverage |
-| `/rules` | Detection rule management (YARA / Sigma / Snort / Suricata / STIX Pattern) |
+| `/rules` | Detection rule management — 500+ Sigma rules auto-imported; YARA / Snort / Suricata / STIX Pattern |
 | `/cases` | Incident response case management with tasks and observables |
 | `/darkweb` | Ransomware victims, credentials, IAB listings, stealer logs |
-| `/connectors` | Connector status and manual trigger |
+| `/connectors` | Connector status, reliability scores, and manual trigger |
 
 ---
 
@@ -171,8 +175,59 @@ In addition to connectors, the worker runs:
 
 | Job | Schedule | Description |
 |-----|----------|-------------|
-| Indicator decay | Daily 03:00 | Reduces confidence on old IoCs, revokes at age 90d |
+| Indicator decay | Daily 03:00 | Reduces confidence on old IoCs, revokes at age 90d; indicators sighted within 30 days are exempt |
 | Warning list refresh | Every 24h | Refreshes FP suppression lists from MISP warninglists |
+
+---
+
+## Sightings
+
+Record when an indicator is observed in your environment from the indicator detail page (`/intel/:id`) or via the API:
+
+```bash
+curl -X POST http://localhost:8000/api/sightings \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sighting_of_ref": "indicator--...",
+    "count": 1,
+    "source": "siem",
+    "note": "Seen in firewall logs"
+  }'
+```
+
+Sighted indicators are stored as STIX `sighting` objects and exempt from confidence decay for 30 days.
+
+---
+
+## TLP Filtering
+
+Every STIX object has a canonical `tlp` field set at ingest. Filter by TLP in the Intel browser dropdown or via the API:
+
+```bash
+# All TLP:AMBER indicators
+curl "http://localhost:8000/api/intel/objects?type=indicator&tlp=TLP:AMBER"
+
+# Filter by source
+curl "http://localhost:8000/api/intel/objects?source=cisa-kev"
+```
+
+---
+
+## Source Trust Scoring
+
+Each connector has a reliability score (0–100) applied to indicator confidence at ingest:
+
+| Score | Connectors |
+|-------|-----------|
+| 95 | CISA KEV, NVD, MITRE ATT&CK |
+| 85 | Spamhaus |
+| 80 | Feodo Tracker, Ransomware.live, RansomLook |
+| 75 | URLhaus, ThreatFox, DShield |
+| 70–72 | MISP Feeds, TAXII |
+| 65–68 | AlienVault OTX, OpenPhish |
+
+An OTX indicator with raw confidence 60 from a connector with reliability 65 is stored with confidence `60 × 65/100 = 39`.
 
 ---
 
@@ -188,6 +243,8 @@ class MyConnector(BaseConnector):
             display_name="My Source",
             connector_type="import_external",
             schedule="0 */6 * * *",
+            source_reliability=75,   # 0-100, applied to indicator confidence
+            default_tlp="TLP:CLEAR", # default TLP for all objects from this connector
         ))
 
     async def run(self) -> IngestResult:
@@ -211,6 +268,8 @@ cd /path/to/clawint
 pip install -r backend/requirements.txt
 python validate_connectors.py
 ```
+
+> The Sigma rules connector requires a live PostgreSQL connection and is tested via `docker compose` only.
 
 ---
 

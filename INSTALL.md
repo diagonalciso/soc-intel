@@ -1,6 +1,6 @@
 # CLAWINT — Installation Guide
 
-CLAWINT is a unified, self-hosted Cyber Threat Intelligence platform. It combines indicator management, case management, dark web tracking, enrichment, and a connector framework into a single Docker Compose deployment.
+CLAWINT is a unified, self-hosted Cyber Threat Intelligence platform. It combines indicator management, case management, dark web tracking, enrichment, detection rules, and a connector framework into a single Docker Compose deployment.
 
 ---
 
@@ -60,8 +60,8 @@ echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/clawint.git
-cd clawint
+git clone https://github.com/diagonalciso/Clawint.git
+cd Clawint
 
 # 2. Create your .env file
 cp .env.example .env
@@ -142,6 +142,7 @@ environment:
 2. Log in with the credentials you set in `SEED_EMAIL` / `SEED_PASSWORD`
 3. Go to **Settings → Security** and change your password
 4. Navigate to **Connectors** to see all available data sources
+5. Trigger the **Sigma Rules** connector to populate the detection rules library (or wait for the weekly run)
 
 ### API access
 
@@ -164,29 +165,32 @@ curl http://localhost:8000/api/connectors \
 
 ## 5. Connectors
 
-CLAWINT ships with 20 built-in connectors that run automatically on schedule. All free connectors work out of the box with no API key required.
+CLAWINT ships with 22 built-in connectors (18 import + 4 enrichment) that run automatically on schedule. All free connectors work out of the box with no API key required.
 
-### Built-in connectors
+### Import connectors
 
-| Connector | Type | Schedule | API Key Required |
-|-----------|------|----------|-----------------|
-| AlienVault OTX | Import | Every 2h | Yes (free) |
-| MISP Public Feeds | Import | Every 4h | No |
-| TAXII 2.1 (Anomali Limo) | Import | Every 6h | No |
-| Ransomwatch | Import | Every 2h | No |
-| Ransomware.live (v2) | Import | Every 2h | No — victims + group profiles |
-| RansomLook | Import | Every 3h | No — CC BY 4.0 |
-| DeepDarkCTI (Ransomware Groups) | Import | Daily 06:00 | No — 200+ groups + onion URLs |
-| Ransomware Leak Sites (Tor) | Import | Every 3h | No |
-| URLhaus (abuse.ch) | Import | Every 30min | No |
-| ThreatFox (abuse.ch) | Import | Every 4h | No |
-| Feodo Tracker (abuse.ch) | Import | Every 6h | No |
-| Spamhaus DROP/EDROP | Import | Every 12h | No |
-| OpenPhish | Import | Every 12h | No |
-| SANS ISC DShield | Import | Every 12h | No |
-| CISA KEV | Import | Every 12h | No |
-| NVD + EPSS | Import | Daily 04:00 | No — optional NVD_API_KEY boosts rate limit |
-| MITRE ATT&CK | Import | Weekly | No |
+| Connector | Type | Schedule | Reliability | Notes |
+|-----------|------|----------|-------------|-------|
+| AlienVault OTX | Import | Every 2h | 65 | Free API key required |
+| MISP Public Feeds | Import | Every 4h | 72 | No key needed |
+| TAXII 2.1 (Anomali Limo) | Import | Every 6h | 70 | No key needed |
+| Ransomwatch | Import | Every 2h | 78 | No key needed |
+| Ransomware.live (v2) | Import | Every 2h | 80 | Victims + group profiles |
+| RansomLook | Import | Every 3h | 80 | CC BY 4.0 |
+| DeepDarkCTI (Ransomware Groups) | Import | Daily 06:00 | 80 | 200+ groups + onion URLs |
+| Ransomware Leak Sites (Tor) | Import | Every 3h | 80 | Tor proxy required |
+| URLhaus (abuse.ch) | Import | Every 30min | 75 | No key needed |
+| ThreatFox (abuse.ch) | Import | Every 4h | 75 | No key needed |
+| Feodo Tracker (abuse.ch) | Import | Every 6h | 80 | No key needed |
+| Spamhaus DROP/EDROP | Import | Every 12h | 85 | No key needed |
+| OpenPhish | Import | Every 12h | 68 | No key needed |
+| SANS ISC DShield | Import | Every 12h | 75 | No key needed |
+| CISA KEV | Import | Every 12h | 95 | Official government source |
+| NVD + EPSS | Import | Daily 04:00 | 95 | Optional NVD_API_KEY boosts rate limit |
+| MITRE ATT&CK | Import | Weekly Sun | 95 | Official MITRE source |
+| Sigma Rules (SigmaHQ) | Import | Weekly Mon | — | Writes to PostgreSQL; Windows/Linux/network/cloud |
+
+The **Reliability** column (0–100) is applied as a multiplier to indicator confidence at ingest time. A score of 95 means the source is authoritative; 65 means open community quality. Sigma rules bypass this (no confidence field; stored directly as detection rules).
 
 ### Scheduled maintenance jobs
 
@@ -194,10 +198,12 @@ In addition to data connectors, the worker runs:
 
 | Job | Schedule | Description |
 |-----|----------|-------------|
-| Indicator decay | Daily 03:00 | Reduces confidence on old indicators; revokes at age 90 days |
-| Warning list refresh | Every 24h | Refreshes MISP FP suppression lists |
+| Indicator decay | Daily 03:00 | Reduces confidence on old indicators (−10/30d); revokes at age 90d. Indicators sighted within the last 30 days are exempt. |
+| Warning list refresh | Every 24h | Refreshes MISP FP suppression lists (top-1000 domains, CDN ranges, cloud IPs) |
 
-**Enrichment connectors** (on-demand, triggered when you look up an observable):
+### Enrichment connectors (on-demand)
+
+Triggered when you look up an observable in the UI or via `/api/enrich`:
 
 | Connector | Enriches | API Key Required |
 |-----------|----------|-----------------|
@@ -212,7 +218,7 @@ Via the UI: **Connectors → [connector name] → Run Now**
 
 Via the API:
 ```bash
-curl -X POST http://localhost:8000/api/connectors/urlhaus/trigger \
+curl -X POST http://localhost:8000/api/connectors/sigma-rules/trigger \
   -H "Authorization: Bearer <token>"
 ```
 
@@ -351,8 +357,8 @@ All data is stored in named Docker volumes:
 
 | Volume | Contents |
 |--------|----------|
-| `clawint_opensearch_data` | All STIX objects, indicators, dark web records |
-| `clawint_postgres_data` | Cases, users, tasks, RBAC |
+| `clawint_opensearch_data` | All STIX objects, indicators, dark web records, sightings |
+| `clawint_postgres_data` | Cases, users, tasks, RBAC, detection rules |
 | `clawint_redis_data` | Session cache |
 | `clawint_rabbitmq_data` | Message queue state |
 | `clawint_minio_data` | Uploaded files, reports |
@@ -380,10 +386,10 @@ docker compose start
 | Port | Service | Notes |
 |------|---------|-------|
 | **3000** | Frontend (React) | Main UI |
-| **8000** | Backend API (FastAPI) | REST + GraphQL. Docs at `/api/docs` |
+| **8000** | Backend API (FastAPI) | REST. Docs at `/api/docs` |
 | **9200** | OpenSearch | STIX object store. Not for public access |
 | **5601** | OpenSearch Dashboards | Optional raw data explorer |
-| **5432** | PostgreSQL | Relational DB. Not for public access |
+| **5432** | PostgreSQL | Cases, users, detection rules. Not for public access |
 | **6379** | Redis | Cache. Not for public access |
 | **5672** | RabbitMQ | Message bus. Not for public access |
 | **15672** | RabbitMQ Management | Web UI for queue inspection |
@@ -399,13 +405,14 @@ docker compose start
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Frontend  (React/TypeScript)                  │
-│         :3000 — Dashboard │ Intel │ Cases │ Dark Web │ Graph    │
+│  :3000 — Dashboard │ Intel │ ATT&CK │ Rules │ Cases │ Dark Web  │
 └─────────────────────────────────────────────────────────────────┘
                                   │
                                   ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                   API  (FastAPI + Strawberry GraphQL)            │
-│         :8000 — REST /api/* │ GraphQL /graphql │ SSE stream     │
+│                        API  (FastAPI)                            │
+│   :8000 — REST /api/* │ SSE stream /stream                      │
+│   intel │ sightings │ rules │ cases │ alerts │ darkweb          │
 └─────────────────────────────────────────────────────────────────┘
          │              │               │               │
          ▼              ▼               ▼               ▼
@@ -413,7 +420,7 @@ docker compose start
    │OpenSearch│  │PostgreSQL│  │    Redis     │  │  MinIO   │
    │  :9200   │  │  :5432   │  │    :6379     │  │  :9000   │
    │STIX/Dark │  │Cases/Users│  │Cache/Sessions│  │  Files   │
-   │web index │  │RBAC/Tasks│  │              │  │          │
+   │web index │  │Rules/RBAC│  │              │  │          │
    └──────────┘  └──────────┘  └──────────────┘  └──────────┘
                                       │
                                ┌──────────┐
@@ -424,7 +431,7 @@ docker compose start
                                       ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │               Worker  (Connector scheduler + enrichment)         │
-│   Runs all import connectors on cron schedule                    │
+│   18 import connectors on cron │ daily decay │ warning lists    │
 └─────────────────────────────────────────────────────────────────┘
          │              │               │               │
     ┌─────────┐  ┌────────────┐  ┌──────────┐  ┌──────────────┐
@@ -437,10 +444,12 @@ docker compose start
 
 ### Data flow
 
-1. **Import connectors** fetch from external sources → convert to STIX 2.1 → POST to `/api/intel/bulk` → stored in OpenSearch
-2. **Dark web connectors** (ransomwatch, ransomware.live, leaksites) write directly to the `clawint-darkweb` OpenSearch index
-3. **Enrichment connectors** are called on-demand when an analyst queries an observable
-4. **Frontend** reads all data via the REST/GraphQL API
+1. **Import connectors** fetch from external sources → convert to STIX 2.1 → TLP normalized + source reliability applied → POST to `/api/intel/bulk` → stored in OpenSearch with deterministic dedup
+2. **Sigma connector** fetches from SigmaHQ GitHub → parses YAML → writes directly to PostgreSQL `detection_rules` table
+3. **Dark web connectors** (ransomwatch, ransomware.live, leaksites) write directly to the `clawint-darkweb` OpenSearch index
+4. **Enrichment connectors** are called on-demand when an analyst queries an observable
+5. **Sightings** are stored as STIX `sighting` objects in OpenSearch; sighted indicators are flagged as decay-exempt
+6. **Frontend** reads all data via the REST API
 
 ---
 
@@ -456,7 +465,9 @@ docker compose up -d --build
 docker compose logs -f api
 ```
 
-Database migrations run automatically on startup via Alembic.
+Database migrations run automatically on startup via SQLAlchemy.
+
+> After upgrading, trigger the Sigma Rules connector manually if you want the latest rules immediately rather than waiting for the weekly schedule.
 
 ---
 
@@ -506,6 +517,16 @@ docker compose logs -f worker
 curl http://localhost:9200/_cluster/health
 ```
 
+### Rules page is empty
+
+The Sigma rules connector runs weekly (Monday 05:00). Trigger it manually to populate immediately:
+```bash
+curl -X POST http://localhost:8000/api/connectors/sigma-rules/trigger \
+  -H "Authorization: Bearer <token>"
+```
+
+Watch progress in worker logs — 500+ rules import in ~2 minutes.
+
 ### Tor-based connectors failing
 
 The leak site scraper connects via Tor. The `tor` container needs a few minutes on first start to establish a circuit.
@@ -514,7 +535,15 @@ The leak site scraper connects via Tor. The `tor` container needs a few minutes 
 docker compose logs tor
 ```
 
-If it shows repeated failures, the Tor network may be blocked from your network. In that case, disable the leaksites connector in `scheduler.py` or use a different Tor exit configuration.
+If it shows repeated failures, the Tor network may be blocked from your network. Disable the leaksites connector in `scheduler.py` or use a different Tor exit configuration.
+
+### TLP filter returning 0 results
+
+New TLP fields are applied to indicators ingested after the feature was enabled. Re-trigger any import connectors to backfill TLP on recent data:
+```bash
+curl -X POST http://localhost:8000/api/connectors/urlhaus/trigger \
+  -H "Authorization: Bearer <token>"
+```
 
 ### Out of disk space
 
@@ -554,6 +583,8 @@ class MyConnector(BaseConnector):
             connector_type="import_external",
             description="Fetches IOCs from my source.",
             schedule="0 */6 * * *",
+            source_reliability=75,   # 0-100, applied to indicator confidence
+            default_tlp="TLP:CLEAR", # default TLP for objects from this connector
         ))
 
     async def run(self) -> IngestResult:
