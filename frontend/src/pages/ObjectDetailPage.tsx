@@ -141,7 +141,7 @@ export default function ObjectDetailPage() {
                 elements={cyElements}
                 layout={cyLayout}
                 style={{ width: '100%', height: 520 }}
-                cy={(cy) => {
+                cy={(cy: any) => {
                   cyRef.current = cy
                   cy.on('tap', 'node', (evt: any) => {
                     const nodeId = evt.target.id()
