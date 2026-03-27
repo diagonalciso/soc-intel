@@ -1,4 +1,108 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
+
+const MOTD: string[] = [
+  "Patch it before they hatch it.",
+  "Your firewall called. It's overwhelmed.",
+  "Have you tried turning off your attack surface?",
+  "Today's forecast: 100% chance of phishing.",
+  "Roses are red, violets are blue, port 22 is open, and so are you.",
+  "In God we trust. All others we monitor.",
+  "The attacker only has to be right once. You have to be right always. No pressure.",
+  "Your password is bad and you should feel bad.",
+  "Trust no one. Especially not that PDF from HR.",
+  "Zero-day: when the vendor finds out the same time as the attacker.",
+  "Error 403: Your OPSEC is forbidden.",
+  "Threat intel: knowing what hit you before the postmortem.",
+  "The call is coming from inside the subnet.",
+  "We don't have a security problem, we have an awareness problem. And a security problem.",
+  "Nation-state or script kiddie? The logs don't care.",
+  "The chain is only as strong as the intern who clicked the link.",
+  "If it's on the internet, it's everyone's attack surface.",
+  "Ransomware: when your backups finally matter.",
+  "Remember: the adversary also has a JIRA board.",
+  "CVE just dropped. Have you met your new boss?",
+  "IOC found. Containment optional. Chaos mandatory.",
+  "Your SIEM has alerts. Your SOC has feelings.",
+  "Every APT group started as a Tuesday.",
+  "MFA: because one factor of forgetting your password wasn't enough.",
+  "The threat is persistent. The advanced is debatable.",
+  "Air gap: the network equivalent of hiding under the covers.",
+  "Defense in depth means they have to pivot more.",
+  "Lateral movement detected. Pizza tracker unavailable.",
+  "Please rotate your credentials. And your soul.",
+  "Your threat model is missing 'tired analyst at 3am'.",
+  "STIX and stones may break my bones, but TAXII will never hurt me.",
+  "Signed malware: because even hackers have code signing budgets now.",
+  "Another day, another C2 beacon going home.",
+  "Supply chain attack: why build a door when you can own the door factory?",
+  "I SPF, therefore I spam.",
+  "The CISO has left the building. The breach has not.",
+  "It's not a backdoor, it's a 'legacy authentication pathway'.",
+  "Living off the land: nature's APT technique.",
+  "Credential stuffing: making password reuse someone else's problem.",
+  "Your EDR is telling you things. Are you listening?",
+  "DLP stands for: Did Lose the Password.",
+  "Blue team: the night shift of the internet.",
+  "Not all heroes wear capes. Some write YARA rules.",
+  "Threat hunting: finding things you wish you hadn't.",
+  "Your attack surface is showing.",
+  "The darkweb called. Your data is doing well.",
+  "Unpatched since 2019. Breached since 2019.",
+  "Every indicator tells a story. This one is a tragedy.",
+  "Least privilege: the principle everyone agrees with and nobody implements.",
+  "The SOC analyst saw it. The ticket sat for 72 hours.",
+  "Hardening a system: the art of making it less embarrassingly open.",
+  "Pentest report delivered. Findings remediated: 0.",
+  "We found it in the logs. We found it six months later.",
+  "Assume breach. Then assume more breach.",
+  "Your VPN is a false sense of security wrapped in UDP.",
+  "The adversary has your org chart. Do you?",
+  "Malware analysis: opening suspicious files so you don't have to.",
+  "Phishing training: the one email your users will actually open.",
+  "Behind every sophisticated attack is someone who found an open S3 bucket.",
+  "Incident response begins before the incident.",
+  "Compliance ≠ security. Please print and frame.",
+  "The hash matched. The story didn't.",
+  "Obfuscation is just job security for reverse engineers.",
+  "PowerShell: the attacker's favorite feature.",
+  "Defense is a team sport. Attackers get to play solo.",
+  "Every CVE was once someone's Friday afternoon.",
+  "Sandbox escaped. Analyst rebooting expectations.",
+  "Your cloud config is public. So is your embarrassment.",
+  "OSINT: the art of finding what you hoped no one would find.",
+  "The breach notification letter template is ready. Just in case.",
+  "Reputation feed says malicious. Finance says 'it's a vendor'.",
+  "Threat actor renamed again. Same TTPs, new logo.",
+  "When in doubt, pivot. When certain, also pivot.",
+  "The log retention policy expired before the breach was discovered.",
+  "IDS: I Detected Something. Now what?",
+  "Your attack path looks like a career ladder.",
+  "Encryption at rest: so they have to try harder.",
+  "The IOC was on the blocklist. The blocklist wasn't deployed.",
+  "Red team: paid to fail gracefully.",
+  "404 security not found.",
+  "Domain fronting: when the CDN becomes a co-conspirator.",
+  "Beaconing every 300 seconds. Regular as rent.",
+  "Threat intelligence is just structured anxiety.",
+  "The firmware is fine. Probably.",
+  "MITRE mapped. Remediated: eventually.",
+  "Typosquatting: when one letter costs a million dollars.",
+  "Every CISO has a plan until they get breached.",
+  "Segmentation: the diet version of isolation.",
+  "Adversary emulation: teaching the blue team to fear us professionally.",
+  "Your OAuth scopes are writing checks your data can't cash.",
+  "The analyst was right. The ticket was closed as a false positive.",
+  "Memory forensics: archaeology for the recently compromised.",
+  "Exfiltration complete. Thanks for the bandwidth.",
+  "The payload was in the metadata.",
+  "Security awareness training: watched, passed, forgotten.",
+  "Dwell time: 197 days. Detection time: now.",
+  "It's always DNS. Except when it's also DNS-over-HTTPS.",
+  "Your third-party risk is having a great quarter.",
+  "We have the telemetry. We lack the sleep.",
+  "The crown jewels are in the public repo.",
+  "Persistence mechanism: because they really like your network.",
+]
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -13,6 +117,7 @@ import ThreatGlobe, { GlobeMarker, resolveCountry } from '../components/ui/Threa
 
 export default function DashboardPage() {
   const nav = useNavigate()
+  const motd = useRef(MOTD[Math.floor(Math.random() * MOTD.length)]).current
   const [pivotValue, setPivotValue] = useState('')
   const [pivotQuery, setPivotQuery] = useState('')
   const [pivotResults, setPivotResults] = useState<{ total: number; by_type: Record<string, number>; objects: unknown[] } | null>(null)
@@ -106,7 +211,10 @@ export default function DashboardPage() {
 
   return (
     <div style={{ padding: 16, overflowX: 'hidden' }}>
-      <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Dashboard</h1>
+      <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Dashboard</h1>
+      <div style={{ fontSize: 12, color: '#4a7c59', fontStyle: 'italic', marginBottom: 16 }}>
+        💀 {motd}
+      </div>
 
       {/* Threat Globe */}
       <div style={{
