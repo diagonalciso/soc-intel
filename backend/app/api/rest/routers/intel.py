@@ -94,6 +94,16 @@ async def get_relationships(
     return await engine.get_relationships(stix_id)
 
 
+@router.get("/objects/{stix_id}/graph")
+async def get_graph(
+    stix_id: str,
+    engine: STIXEngine = Depends(get_stix_engine),
+    user: User = Depends(get_current_user),
+):
+    """Return graph data (nodes + edges) for Cytoscape visualization."""
+    return await engine.get_graph(stix_id)
+
+
 @router.post("/relationships")
 async def create_relationship(
     payload: RelationshipCreate,

@@ -4,6 +4,7 @@ Runs import connectors on their configured cron schedules.
 """
 import asyncio
 import logging
+from datetime import datetime, timedelta, timezone
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -18,6 +19,9 @@ from app.connectors.builtin.sslbl import SpamhausDropConnector
 from app.connectors.builtin.dshield import DShieldConnector
 from app.connectors.builtin.openphish import OpenPhishConnector
 from app.connectors.builtin.ransomware_live import RansomwareLiveConnector
+from app.connectors.builtin.ransomlook import RansomLookConnector
+from app.connectors.builtin.deepdark_cti import DeepDarkCTIConnector
+from app.connectors.builtin.nvd_epss import NVDEPSSConnector
 from app.connectors.builtin.otx_import import OTXImportConnector
 from app.connectors.builtin.misp_feeds import MISPFeedsConnector
 from app.connectors.builtin.taxii_import import TAXIIImportConnector
@@ -32,6 +36,8 @@ CONNECTORS = [
     TAXIIImportConnector(),
     RansomwatchConnector(),
     RansomwareLiveConnector(),
+    RansomLookConnector(),
+    DeepDarkCTIConnector(),
     LeakSiteScraper(),
     URLhausConnector(),
     ThreatFoxConnector(),
@@ -40,6 +46,7 @@ CONNECTORS = [
     OpenPhishConnector(),
     DShieldConnector(),
     CISAKEVConnector(),
+    NVDEPSSConnector(),
     MITREAttackConnector(),
 ]
 
@@ -56,6 +63,108 @@ async def _run_connector(connector):
         logger.error(f"Connector [{connector.config.name}]: unhandled error: {e}")
     finally:
         await connector.close()
+
+
+async def _decay_indicators():
+    """
+    Daily indicator decay job.
+    - Marks indicators with expired valid_until as revoked.
+    - Reduces confidence by 10 for indicators older than 30 days (floor: 10).
+    - Marks revoked if confidence reaches 10 and age > 90 days.
+    """
+    from app.db.opensearch import get_opensearch, STIX_INDEX
+    client = get_opensearch()
+    now = datetime.now(timezone.utc)
+    now_str = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    cutoff_30d = (now - timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+    cutoff_90d = (now - timedelta(days=90)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+    # 1. Expire indicators past valid_until
+    try:
+        resp = await client.update_by_query(
+            index=STIX_INDEX,
+            body={
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"term": {"type": "indicator"}},
+                            {"term": {"revoked": False}},
+                            {"range": {"valid_until": {"lt": now_str}}},
+                        ]
+                    }
+                },
+                "script": {
+                    "source": "ctx._source.revoked = true; ctx._source.modified = params.now",
+                    "params": {"now": now_str},
+                },
+            },
+        )
+        expired = resp.get("updated", 0)
+        if expired:
+            logger.info(f"Indicator decay: expired {expired} indicators past valid_until")
+    except Exception as e:
+        logger.error(f"Indicator decay (expire): {e}")
+
+    # 2. Reduce confidence on indicators older than 30 days
+    try:
+        resp = await client.update_by_query(
+            index=STIX_INDEX,
+            body={
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"term": {"type": "indicator"}},
+                            {"term": {"revoked": False}},
+                            {"range": {"created": {"lt": cutoff_30d}}},
+                            {"range": {"confidence": {"gt": 10}}},
+                        ]
+                    }
+                },
+                "script": {
+                    "source": (
+                        "if (ctx._source.confidence > 10) {"
+                        "  ctx._source.confidence = Math.max(10, ctx._source.confidence - 10);"
+                        "  ctx._source.modified = params.now;"
+                        "} else {"
+                        "  ctx.op = 'noop';"
+                        "}"
+                    ),
+                    "params": {"now": now_str},
+                },
+            },
+        )
+        decayed = resp.get("updated", 0)
+        if decayed:
+            logger.info(f"Indicator decay: reduced confidence on {decayed} old indicators")
+    except Exception as e:
+        logger.error(f"Indicator decay (confidence): {e}")
+
+    # 3. Revoke very old low-confidence indicators (>90d, confidence == 10)
+    try:
+        resp = await client.update_by_query(
+            index=STIX_INDEX,
+            body={
+                "query": {
+                    "bool": {
+                        "must": [
+                            {"term": {"type": "indicator"}},
+                            {"term": {"revoked": False}},
+                            {"range": {"created": {"lt": cutoff_90d}}},
+                            {"term": {"confidence": 10}},
+                        ]
+                    }
+                },
+                "script": {
+                    "source": "ctx._source.revoked = true; ctx._source.modified = params.now",
+                    "params": {"now": now_str},
+                },
+            },
+        )
+        revoked = resp.get("updated", 0)
+        if revoked:
+            logger.info(f"Indicator decay: revoked {revoked} aged-out low-confidence indicators")
+    except Exception as e:
+        logger.error(f"Indicator decay (revoke): {e}")
 
 
 def setup_scheduler():
@@ -82,8 +191,18 @@ def setup_scheduler():
         )
         logger.info(f"Scheduled connector: {connector.config.name} ({schedule})")
 
+    # Indicator decay — runs daily at 03:00
+    scheduler.add_job(
+        _decay_indicators,
+        CronTrigger(hour=3, minute=0),
+        id="indicator-decay",
+        name="Indicator Decay",
+        replace_existing=True,
+    )
+    logger.info("Scheduled: indicator decay (daily 03:00)")
+
     scheduler.start()
-    logger.info(f"Scheduler started with {len(CONNECTORS)} connectors")
+    logger.info(f"Scheduler started with {len(CONNECTORS)} connectors + decay job")
 
 
 async def run_connector_now(name: str) -> bool:

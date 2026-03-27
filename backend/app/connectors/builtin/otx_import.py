@@ -137,11 +137,12 @@ class OTXImportConnector(BaseConnector):
                 "x_clawint_pulse_id": pulse_id,
                 "x_clawint_pulse_name": pulse_name,
                 "x_clawint_malware_families": [
-                    mf.get("display_name") or mf.get("id", "")
+                    (mf.get("display_name") or mf.get("id", "")) if isinstance(mf, dict) else str(mf)
                     for mf in pulse.get("malware_families", [])
                 ],
                 "x_clawint_attack_ids": [
-                    a.get("id", "") for a in pulse.get("attack_ids", [])
+                    (a.get("id", "") if isinstance(a, dict) else str(a))
+                    for a in pulse.get("attack_ids", [])
                 ],
                 "external_references": refs,
             })
@@ -163,13 +164,19 @@ class OTXImportConnector(BaseConnector):
 def _build_labels(pulse: dict) -> list[str]:
     labels = ["otx"]
     for tag in pulse.get("tags", []):
-        clean = tag.lower().replace(" ", "-")[:64]
-        if clean:
-            labels.append(clean)
+        if isinstance(tag, str):
+            clean = tag.lower().replace(" ", "-")[:64]
+            if clean:
+                labels.append(clean)
     for mf in pulse.get("malware_families", []):
-        name = (mf.get("display_name") or mf.get("id") or "").lower().replace(" ", "-")
+        if isinstance(mf, dict):
+            name = (mf.get("display_name") or mf.get("id") or "").lower().replace(" ", "-")
+        elif isinstance(mf, str):
+            name = mf.lower().replace(" ", "-")
+        else:
+            continue
         if name:
-            labels.append(name)
+            labels.append(name[:64])
     return list(dict.fromkeys(labels))  # dedupe, preserve order
 
 

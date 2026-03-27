@@ -164,7 +164,7 @@ curl http://localhost:8000/api/connectors \
 
 ## 5. Connectors
 
-CLAWINT ships with 14 built-in connectors that run automatically on schedule. All free connectors work out of the box with no API key required.
+CLAWINT ships with 20 built-in connectors that run automatically on schedule. All free connectors work out of the box with no API key required.
 
 ### Built-in connectors
 
@@ -174,7 +174,9 @@ CLAWINT ships with 14 built-in connectors that run automatically on schedule. Al
 | MISP Public Feeds | Import | Every 4h | No |
 | TAXII 2.1 (Anomali Limo) | Import | Every 6h | No |
 | Ransomwatch | Import | Every 2h | No |
-| Ransomware.live | Import | Every 2h | No |
+| Ransomware.live (v2) | Import | Every 2h | No — victims + group profiles |
+| RansomLook | Import | Every 3h | No — CC BY 4.0 |
+| DeepDarkCTI (Ransomware Groups) | Import | Daily 06:00 | No — 200+ groups + onion URLs |
 | Ransomware Leak Sites (Tor) | Import | Every 3h | No |
 | URLhaus (abuse.ch) | Import | Every 30min | No |
 | ThreatFox (abuse.ch) | Import | Every 4h | No |
@@ -183,7 +185,17 @@ CLAWINT ships with 14 built-in connectors that run automatically on schedule. Al
 | OpenPhish | Import | Every 12h | No |
 | SANS ISC DShield | Import | Every 12h | No |
 | CISA KEV | Import | Every 12h | No |
+| NVD + EPSS | Import | Daily 04:00 | No — optional NVD_API_KEY boosts rate limit |
 | MITRE ATT&CK | Import | Weekly | No |
+
+### Scheduled maintenance jobs
+
+In addition to data connectors, the worker runs:
+
+| Job | Schedule | Description |
+|-----|----------|-------------|
+| Indicator decay | Daily 03:00 | Reduces confidence on old indicators; revokes at age 90 days |
+| Warning list refresh | Every 24h | Refreshes MISP FP suppression lists |
 
 **Enrichment connectors** (on-demand, triggered when you look up an observable):
 
@@ -229,6 +241,14 @@ API keys are set in `.env`. The platform works fully with free sources only — 
 - Provides access to 8,000+ community threat pulses with IOCs
 ```env
 OTX_API_KEY=your-key-here
+```
+
+**NVD API Key** — [nvd.nist.gov/developers/request-an-api-key](https://nvd.nist.gov/developers/request-an-api-key)
+- Free to request, takes ~1 hour to activate
+- Without key: 5 requests / 30 seconds. With key: 50 requests / 30 seconds
+- Significantly speeds up the initial NVD import (120-day backfill)
+```env
+NVD_API_KEY=your-key-here
 ```
 
 **GreyNoise Community** — [greynoise.io](https://greynoise.io)

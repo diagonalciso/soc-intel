@@ -2,6 +2,8 @@
 Core STIX 2.1 engine — CRUD for all STIX objects stored in OpenSearch.
 All objects stored as-is STIX JSON with clawint extensions.
 """
+import hashlib
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -28,6 +30,35 @@ def _now() -> str:
 
 def _stix_id(stix_type: str) -> str:
     return f"{stix_type}--{uuid.uuid4()}"
+
+
+# ── Deterministic ID helpers ─────────────────────────────────────────────────
+# For indicators, use a stable UUID5 based on type+pattern so the same IoC
+# from multiple connectors always resolves to the same document (upsert).
+
+_INDICATOR_NAMESPACE = uuid.UUID("a3b4c5d6-e7f8-4a9b-0c1d-2e3f4a5b6c7d")
+
+_PATTERN_VALUE_RE = re.compile(r"=\s*['\"]([^'\"]+)['\"]")
+
+
+def _extract_pattern_value(pattern: str) -> str | None:
+    """Extract the literal value from a STIX pattern, e.g. '1.2.3.4' from
+    "[ipv4-addr:value = '1.2.3.4']". Returns None if extraction fails."""
+    m = _PATTERN_VALUE_RE.search(pattern or "")
+    return m.group(1) if m else None
+
+
+def _deterministic_indicator_id(obj: dict) -> str:
+    """
+    Return a deterministic STIX ID for an indicator based on its pattern value.
+    If no extractable value, fall back to a hash of the full pattern.
+    """
+    pattern = obj.get("pattern", "")
+    value = _extract_pattern_value(pattern) or pattern
+    indicator_type = obj.get("indicator_types", ["unknown"])[0] if obj.get("indicator_types") else "unknown"
+    seed = f"{indicator_type}:{value.strip().lower()}"
+    stable_uuid = uuid.uuid5(_INDICATOR_NAMESPACE, seed)
+    return f"indicator--{stable_uuid}"
 
 
 class STIXEngine:
@@ -165,20 +196,50 @@ class STIXEngine:
         return await self.create("relationship", data, created_by=created_by)
 
     async def bulk_ingest(self, objects: list[dict]) -> dict:
-        """Bulk ingest STIX objects (from connectors)."""
+        """
+        Bulk ingest STIX objects (from connectors).
+        Applies deterministic deduplication for indicators and FP flagging.
+        """
         if not objects:
             return {"indexed": 0, "errors": 0}
 
+        # Lazy import to avoid circular deps and slow startup
+        try:
+            from app.core.warning_lists import is_false_positive
+            _wl_available = True
+        except ImportError:
+            _wl_available = False
+
         body = []
         for obj in objects:
-            if "id" not in obj:
-                obj["id"] = _stix_id(obj.get("type", "indicator"))
+            obj_type = obj.get("type", "indicator")
+
+            # Deterministic ID for indicators — deduplicates across connectors
+            if obj_type == "indicator" and "pattern" in obj:
+                obj["id"] = _deterministic_indicator_id(obj)
+            elif "id" not in obj:
+                obj["id"] = _stix_id(obj_type)
+
             if "spec_version" not in obj:
                 obj["spec_version"] = "2.1"
             if "created" not in obj:
                 obj["created"] = _now()
             if "modified" not in obj:
                 obj["modified"] = _now()
+
+            # Warning list check — flag FPs instead of silently storing
+            if _wl_available and obj_type == "indicator":
+                pattern_val = _extract_pattern_value(obj.get("pattern", ""))
+                if pattern_val:
+                    indicator_types = obj.get("indicator_types", [])
+                    ioc_type = indicator_types[0] if indicator_types else _infer_type(pattern_val)
+                    try:
+                        is_fp, reason = await is_false_positive(ioc_type, pattern_val)
+                        if is_fp:
+                            obj["x_clawint_fp_candidate"] = True
+                            obj["x_clawint_fp_reason"] = reason
+                    except Exception:
+                        pass
 
             body.append({"index": {"_index": STIX_INDEX, "_id": obj["id"]}})
             body.append(obj)
@@ -188,6 +249,46 @@ class STIXEngine:
         indexed = sum(1 for item in result["items"] if item.get("index", {}).get("result") in ("created", "updated"))
         errors = len(result["items"]) - indexed
         return {"indexed": indexed, "errors": errors}
+
+    async def get_graph(self, stix_id: str, depth: int = 1) -> dict:
+        """
+        Return graph data for Cytoscape: {nodes: [...], edges: [...]}.
+        Fetches the root object, all direct relationships, and the
+        objects at the other end of each relationship.
+        """
+        root = await self.get(stix_id)
+        if not root:
+            return {"nodes": [], "edges": []}
+
+        nodes = {stix_id: root}
+        edges = []
+
+        rels = await self.get_relationships(stix_id)
+        for rel in rels:
+            edges.append({
+                "id":    rel.get("id", ""),
+                "source": rel.get("source_ref", ""),
+                "target": rel.get("target_ref", ""),
+                "label":  rel.get("relationship_type", ""),
+            })
+            for ref in (rel.get("source_ref", ""), rel.get("target_ref", "")):
+                if ref and ref != stix_id and ref not in nodes:
+                    obj = await self.get(ref)
+                    if obj:
+                        nodes[ref] = obj
+
+        return {
+            "nodes": [
+                {
+                    "id":    n["id"],
+                    "type":  n.get("type", ""),
+                    "label": n.get("name") or n.get("value") or n.get("id", "")[:32],
+                    "root":  n["id"] == stix_id,
+                }
+                for n in nodes.values()
+            ],
+            "edges": edges,
+        }
 
     # ── Dark web objects ────────────────────────────────────────
 
@@ -258,3 +359,21 @@ def get_stix_engine() -> STIXEngine:
     if _engine is None:
         _engine = STIXEngine()
     return _engine
+
+
+def _infer_type(value: str) -> str:
+    """Guess the indicator type from a raw value string."""
+    import re as _re
+    if _re.match(r"^\d{1,3}(\.\d{1,3}){3}$", value):
+        return "ipv4-addr"
+    if _re.match(r"^[0-9a-fA-F]{32}$", value):
+        return "file:hashes.MD5"
+    if _re.match(r"^[0-9a-fA-F]{40}$", value):
+        return "file:hashes.SHA-1"
+    if _re.match(r"^[0-9a-fA-F]{64}$", value):
+        return "file:hashes.SHA-256"
+    if value.startswith(("http://", "https://")):
+        return "url"
+    if "@" in value:
+        return "email-addr"
+    return "domain-name"

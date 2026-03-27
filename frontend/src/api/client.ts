@@ -100,3 +100,22 @@ export const triggerConnector = (name: string) =>
 
 // ── Intel stats ───────────────────────────────────────────────
 export const getIntelStats = () => api.get('/intel/stats')
+
+// ── Object graph ──────────────────────────────────────────────
+export const getObjectGraph = (id: string) => api.get(`/intel/objects/${id}/graph`)
+
+// ── Detection rules ───────────────────────────────────────────
+export const getRules = (params?: Record<string, unknown>) =>
+  api.get('/rules', { params })
+
+export const getRule = (id: string) => api.get(`/rules/${id}`)
+
+export const createRule = (data: Record<string, unknown>) =>
+  api.post('/rules', data)
+
+export const updateRule = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/rules/${id}`, data)
+
+export const deleteRule = (id: string) => api.delete(`/rules/${id}`)
+
+export const getRuleStats = () => api.get('/rules/stats')

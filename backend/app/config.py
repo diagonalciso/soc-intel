@@ -68,6 +68,7 @@ class Settings(BaseSettings):
 
     # Connector API keys
     otx_api_key: str = ""
+    nvd_api_key: str = ""   # optional — boosts NVD rate limit from 5→50 req/30s
     virustotal_api_key: str = ""
     shodan_api_key: str = ""
     censys_api_id: str = ""

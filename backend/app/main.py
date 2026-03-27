@@ -56,6 +56,7 @@ from app.api.rest.routers.cases import router as cases_router, alert_router
 from app.api.rest.routers.darkweb import router as darkweb_router
 from app.api.rest.routers.enrichment import router as enrichment_router
 from app.api.rest.routers.connectors import router as connectors_router
+from app.api.rest.routers.rules import router as rules_router
 from app.stream.sse import router as stream_router
 
 for router in [
@@ -66,6 +67,7 @@ for router in [
     darkweb_router,
     enrichment_router,
     connectors_router,
+    rules_router,
     stream_router,
 ]:
     app.include_router(router, prefix="/api")

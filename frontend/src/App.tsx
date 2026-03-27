@@ -6,6 +6,8 @@ import CasesPage from './pages/CasesPage'
 import DarkWebPage from './pages/DarkWebPage'
 import ConnectorsPage from './pages/ConnectorsPage'
 import ObjectDetailPage from './pages/ObjectDetailPage'
+import AttackPage from './pages/AttackPage'
+import RulesPage from './pages/RulesPage'
 
 export default function App() {
   return (
@@ -15,6 +17,8 @@ export default function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="intel" element={<IntelPage />} />
         <Route path="intel/:stixId" element={<ObjectDetailPage />} />
+        <Route path="attack" element={<AttackPage />} />
+        <Route path="rules" element={<RulesPage />} />
         <Route path="cases" element={<CasesPage />} />
         <Route path="darkweb" element={<DarkWebPage />} />
         <Route path="connectors" element={<ConnectorsPage />} />

@@ -1,7 +1,8 @@
 """
 Ransomware.live connector — import.
-Ingests ransomware victim listings from ransomware.live API.
+Ingests ransomware victim listings and group profiles from ransomware.live API v2.
 Free, no API key required for basic use.
+https://api.ransomware.live/v2 — https://www.ransomware.live/apidocs
 """
 from datetime import datetime, timezone
 import re
@@ -11,35 +12,58 @@ from app.db.opensearch import get_opensearch, DARKWEB_INDEX
 
 
 class RansomwareLiveConnector(BaseConnector):
-    API_URL = "https://api.ransomware.live/v1/recentvictims"
+    BASE_URL    = "https://api.ransomware.live/v2"
+    BASE_URL_V1 = "https://api.ransomware.live/v1"
 
     def __init__(self):
         super().__init__(ConnectorConfig(
             name="ransomware-live",
             display_name="Ransomware.live",
             connector_type="import_external",
-            description="Recent ransomware victims from ransomware.live community tracker.",
+            description="Ransomware victims and group profiles from ransomware.live (v2 API, 200+ groups).",
             schedule="0 */2 * * *",  # every 2 hours
         ))
 
     async def run(self) -> IngestResult:
-        self.logger.info("Ransomware.live: fetching recent victims...")
+        self.logger.info("Ransomware.live: fetching victims and groups...")
         result = IngestResult()
 
-        try:
-            resp = await self.http.get(
-                self.API_URL,
-                headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
-            )
-            resp.raise_for_status()
-            victims = resp.json()
-        except Exception as e:
-            self.logger.error(f"Ransomware.live: fetch failed: {e}")
+        victims_result = await self._ingest_victims()
+        groups_result = await self._ingest_groups()
+
+        result.objects_created = victims_result.objects_created + groups_result.objects_created
+        result.errors = victims_result.errors + groups_result.errors
+        self.logger.info(
+            f"Ransomware.live: {result.objects_created} objects ingested, {result.errors} errors"
+        )
+        return result
+
+    async def _ingest_victims(self) -> IngestResult:
+        result = IngestResult()
+        headers = {"User-Agent": "CLAWINT/1.0 CTI Platform (research)"}
+        victims = None
+
+        # Try v2 with extended timeout first, fall back to v1
+        for url in (f"{self.BASE_URL}/recentvictims", f"{self.BASE_URL_V1}/recentvictims"):
+            try:
+                import httpx as _httpx
+                async with _httpx.AsyncClient(timeout=90.0, follow_redirects=True) as client:
+                    resp = await client.get(url, headers=headers)
+                resp.raise_for_status()
+                victims = resp.json()
+                if isinstance(victims, list):
+                    self.logger.info(f"Ransomware.live: using {url} ({len(victims)} victims)")
+                    break
+            except Exception as e:
+                self.logger.warning(f"Ransomware.live: {url} failed: {e}")
+
+        if not victims:
+            self.logger.error("Ransomware.live: both v2 and v1 victims endpoints failed")
             result.errors += 1
             return result
 
         if not isinstance(victims, list):
-            self.logger.warning(f"Ransomware.live: unexpected response format")
+            self.logger.warning("Ransomware.live: unexpected victims response format")
             return result
 
         client = get_opensearch()
@@ -61,7 +85,7 @@ class RansomwareLiveConnector(BaseConnector):
             doc = {
                 "id": doc_id,
                 "type": "ransomware-leak",
-                "created": _now(),
+                "created": date_posted,
                 "modified": _now(),
                 "source": "ransomware-live",
                 "group_name": group,
@@ -71,7 +95,6 @@ class RansomwareLiveConnector(BaseConnector):
                 "sector": sector,
                 "date_posted": date_posted,
                 "files_published": bool(v.get("post_url") or v.get("url")),
-                "data_size_gb": None,
                 "description": description[:500] if description else "",
             }
             bulk.append({"index": {"_index": DARKWEB_INDEX, "_id": doc_id}})
@@ -85,11 +108,67 @@ class RansomwareLiveConnector(BaseConnector):
                 result.errors += errors
                 result.objects_created -= errors
             except Exception as e:
-                self.logger.error(f"Ransomware.live: OpenSearch bulk error: {e}")
+                self.logger.error(f"Ransomware.live: OpenSearch bulk error (victims): {e}")
                 result.errors += len(bulk) // 2
                 result.objects_created = 0
 
-        self.logger.info(f"Ransomware.live: ingested {result.objects_created} victims")
+        return result
+
+    async def _ingest_groups(self) -> IngestResult:
+        """Fetch group profiles from /v2/groups and store as ransomware-group docs."""
+        result = IngestResult()
+        try:
+            resp = await self.http.get(
+                f"{self.BASE_URL}/groups",
+                headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+            )
+            resp.raise_for_status()
+            groups = resp.json()
+        except Exception as e:
+            self.logger.warning(f"Ransomware.live: groups fetch failed: {e}")
+            return result
+
+        if not isinstance(groups, list):
+            return result
+
+        client = get_opensearch()
+        bulk = []
+        now = _now()
+
+        for g in groups:
+            name = (g.get("name") or g.get("group_name") or "").strip()
+            if not name:
+                continue
+
+            doc_id = f"ransomware-group--rwlive-{_slug(name)}"
+            doc = {
+                "id": doc_id,
+                "type": "ransomware-group",
+                "created": now,
+                "modified": now,
+                "source": "ransomware-live",
+                "group_name": name.lower(),
+                "group_display_name": name,
+                "leak_site_url": (g.get("url") or g.get("onion") or g.get("leak_site") or "").strip(),
+                "status": (g.get("status") or "").strip(),
+                "description": (g.get("description") or g.get("profile") or "")[:500],
+                "date_posted": now,
+            }
+            bulk.append({"index": {"_index": DARKWEB_INDEX, "_id": doc_id}})
+            bulk.append(doc)
+            result.objects_created += 1
+
+        if bulk:
+            try:
+                resp_bulk = await client.bulk(body=bulk, refresh=False)
+                errors = sum(1 for item in resp_bulk["items"] if item.get("index", {}).get("error"))
+                result.errors += errors
+                result.objects_created -= errors
+            except Exception as e:
+                self.logger.error(f"Ransomware.live: OpenSearch bulk error (groups): {e}")
+                result.errors += len(bulk) // 2
+                result.objects_created = 0
+
         return result
 
 
