@@ -1,9 +1,9 @@
 /**
  * ThreatGlobe — rotating 3D globe showing recent incident locations.
  * Powered by COBE (WebGL canvas globe).
- * Markers represent countries with recent ransomware victims.
+ * Supports mouse drag and touch drag to spin the globe.
  */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import createGlobe from 'cobe'
 
 export interface GlobeMarker {
@@ -20,42 +20,112 @@ interface Props {
 
 export default function ThreatGlobe({ markers, width = 380 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const phiRef = useRef(0)
-  const widthRef = useRef(width)
-  widthRef.current = width
+
+  // Globe state — kept in refs so onRender always sees the latest values
+  const phiRef   = useRef(0.6)      // current longitude rotation
+  const thetaRef = useRef(0.15)     // current latitude tilt
+  const dragging = useRef(false)
+  const lastPos  = useRef({ x: 0, y: 0 })
+  const velocity = useRef({ x: 0, y: 0 }) // momentum after drag ends
 
   useEffect(() => {
-    if (!canvasRef.current) return
+    const canvas = canvasRef.current
+    if (!canvas) return
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
-    let globe: ReturnType<typeof createGlobe>
 
-    globe = createGlobe(canvasRef.current, {
+    const globe = createGlobe(canvas, {
       devicePixelRatio: dpr,
-      width: width * dpr,
+      width:  width * dpr,
       height: width * dpr,
-      phi: 0.6,
-      theta: 0.15,
+      phi:    phiRef.current,
+      theta:  thetaRef.current,
       dark: 1,
       diffuse: 1.1,
       mapSamples: 20000,
       mapBrightness: 5,
-      baseColor: [0.15, 0.18, 0.25],
-      markerColor: [1.0, 0.2, 0.2],
-      glowColor: [0.18, 0.28, 0.55],
+      baseColor:   [0.15, 0.18, 0.25],
+      markerColor: [1.0,  0.2,  0.2],
+      glowColor:   [0.18, 0.28, 0.55],
       scale: 1.05,
       offset: [0, 0],
       markers,
       onRender(state) {
-        state.phi = phiRef.current
-        phiRef.current += 0.0035
+        if (dragging.current) {
+          // Dampen momentum while actively dragging
+          velocity.current.x *= 0.6
+          velocity.current.y *= 0.6
+        } else {
+          // Apply momentum (decays each frame)
+          velocity.current.x *= 0.95
+          velocity.current.y *= 0.95
+          phiRef.current   += velocity.current.x
+          thetaRef.current += velocity.current.y
+          // Auto-rotate slowly when idle
+          phiRef.current += 0.003
+        }
+        // Clamp theta so the globe doesn't flip upside-down
+        thetaRef.current = Math.max(-0.6, Math.min(0.6, thetaRef.current))
+        state.phi   = phiRef.current
+        state.theta = thetaRef.current
       },
     })
 
+    // ── Pointer helpers (unified mouse + touch) ──────────────────
+    function getXY(e: MouseEvent | TouchEvent): { x: number; y: number } {
+      if ('touches' in e) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY }
+      }
+      return { x: e.clientX, y: e.clientY }
+    }
+
+    function onDown(e: MouseEvent | TouchEvent) {
+      dragging.current = true
+      const { x, y } = getXY(e)
+      lastPos.current = { x, y }
+      velocity.current = { x: 0, y: 0 }
+    }
+
+    function onMove(e: MouseEvent | TouchEvent) {
+      if (!dragging.current) return
+      const { x, y } = getXY(e)
+      const dx = x - lastPos.current.x
+      const dy = y - lastPos.current.y
+      lastPos.current = { x, y }
+
+      // Scale drag pixels → radians; width gives natural feel at any size
+      const scale = 4 / width
+      phiRef.current   += dx * scale
+      thetaRef.current -= dy * scale
+
+      // Record velocity for momentum on release
+      velocity.current.x = dx * scale
+      velocity.current.y = -dy * scale
+    }
+
+    function onUp() {
+      dragging.current = false
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown',  onDown)
+    window.addEventListener('mousemove',  onMove)
+    window.addEventListener('mouseup',    onUp)
+
+    // Touch events
+    canvas.addEventListener('touchstart', onDown, { passive: true })
+    window.addEventListener('touchmove',  onMove, { passive: true })
+    window.addEventListener('touchend',   onUp)
+
     return () => {
       globe.destroy()
+      canvas.removeEventListener('mousedown',  onDown)
+      window.removeEventListener('mousemove',  onMove)
+      window.removeEventListener('mouseup',    onUp)
+      canvas.removeEventListener('touchstart', onDown)
+      window.removeEventListener('touchmove',  onMove)
+      window.removeEventListener('touchend',   onUp)
     }
-  // Recreate globe when markers change (dep on length + first coord is a good proxy)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markers.length, width])
 
@@ -66,7 +136,10 @@ export default function ThreatGlobe({ markers, width = 380 }: Props) {
         width,
         height: width,
         display: 'block',
+        cursor: 'grab',
       }}
+      onMouseDown={(e) => { e.currentTarget.style.cursor = 'grabbing' }}
+      onMouseUp={(e)   => { e.currentTarget.style.cursor = 'grab' }}
     />
   )
 }
