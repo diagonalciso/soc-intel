@@ -84,6 +84,9 @@ class Settings(BaseSettings):
     recorded_future_api_key: str = ""
     intel471_username: str = ""
     intel471_api_key: str = ""
+    vulncheck_api_key: str = ""
+    urlscan_api_key: str = ""
+    hybrid_analysis_api_key: str = ""
 
     class Config:
         env_file = ".env"

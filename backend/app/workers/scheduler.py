@@ -29,6 +29,9 @@ from app.connectors.builtin.sigma_rules import SigmaRulesConnector
 from app.connectors.builtin.malwarebazaar import MalwareBazaarConnector
 from app.connectors.builtin.phishtank import PhishTankConnector
 from app.connectors.builtin.pulsedive import PulsediveConnector
+from app.connectors.builtin.osv import OSVConnector
+from app.connectors.builtin.urlscan import URLScanConnector
+from app.connectors.builtin.vulncheck_kev import VulnCheckKEVConnector
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +59,9 @@ _SOURCE_RELIABILITY: dict[str, int] = {
     "malwarebazaar": 75,
     "phishtank":     72,
     "pulsedive":     72,
+    "osv-dev":       85,
+    "urlscan-io":    72,
+    "vulncheck-kev": 90,
 }
 
 CONNECTORS = [
@@ -80,6 +86,9 @@ CONNECTORS = [
     MalwareBazaarConnector(),
     PhishTankConnector(),
     PulsediveConnector(),
+    OSVConnector(),
+    URLScanConnector(),
+    VulnCheckKEVConnector(),
 ]
 
 # Apply reliability overrides
