@@ -86,7 +86,8 @@ async def search_objects(
 ):
     filters: dict = {}
     if tlp:
-        filters["tlp"] = tlp
+        # tlp may be dynamically mapped as text+keyword; use .keyword sub-field for exact match
+        filters["tlp.keyword"] = tlp
     if source:
         filters["x_clawint_source"] = source
     return await engine.search(stix_type=type, query=q, filters=filters or None, from_=from_, size=size)
