@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -9,6 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   LineChart, Line, CartesianGrid,
 } from 'recharts'
+import ThreatGlobe, { GlobeMarker, resolveCountry } from '../components/ui/ThreatGlobe'
 
 export default function DashboardPage() {
   const nav = useNavigate()
@@ -73,9 +74,115 @@ export default function DashboardPage() {
     .slice(0, 10)
     .map(([name, count]) => ({ name: name.replace('-', '\u2011'), count }))
 
+  // Globe markers derived from ransomware victim countries
+  const globeMarkers: GlobeMarker[] = useMemo(() => {
+    const byCountry = ransomStats?.by_country as Record<string, number> | undefined
+    if (!byCountry) return []
+    const max = Math.max(...Object.values(byCountry), 1)
+    const markers: GlobeMarker[] = []
+    for (const [country, count] of Object.entries(byCountry)) {
+      const coords = resolveCountry(country)
+      if (!coords) continue
+      // Jitter to avoid overlap for same-country multi-source markers
+      const jitter = (): number => (Math.random() - 0.5) * 0.8
+      markers.push({
+        location: [coords[0] + jitter(), coords[1] + jitter()],
+        size: 0.025 + (count / max) * 0.09,
+        label: country,
+        count,
+      })
+    }
+    return markers
+  }, [ransomStats?.by_country])
+
+  // Top countries by victim count for the legend
+  const topCountries = useMemo(() => {
+    const byCountry = ransomStats?.by_country as Record<string, number> | undefined
+    if (!byCountry) return []
+    return Object.entries(byCountry)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 8)
+  }, [ransomStats?.by_country])
+
   return (
     <div style={{ padding: 16, overflowX: 'hidden' }}>
       <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Dashboard</h1>
+
+      {/* Threat Globe */}
+      <div style={{
+        ...cardStyle,
+        marginBottom: 16,
+        display: 'flex',
+        gap: 24,
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}>
+        {/* Globe canvas */}
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <ThreatGlobe markers={globeMarkers} width={340} />
+          <div style={{ fontSize: 10, color: '#4a5568', letterSpacing: 1 }}>
+            RECENT INCIDENT LOCATIONS
+          </div>
+        </div>
+
+        {/* Right panel: title + legend */}
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+            Global Threat Map
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 16, lineHeight: 1.5 }}>
+            Ransomware victim locations from all active data sources.
+            Marker size reflects victim count.
+          </div>
+
+          {topCountries.length > 0 ? (
+            <div>
+              <div style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 600, letterSpacing: 1, marginBottom: 8 }}>
+                TOP AFFECTED COUNTRIES
+              </div>
+              {topCountries.map(([country, count], i) => (
+                <div key={country} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '4px 0', borderBottom: '1px solid var(--border)',
+                }}>
+                  <div style={{
+                    width: 18, height: 18, borderRadius: '50%',
+                    background: `rgba(239,68,68,${0.9 - i * 0.08})`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 9, color: '#fff', fontWeight: 700, flexShrink: 0,
+                  }}>
+                    {i + 1}
+                  </div>
+                  <div style={{ fontSize: 12, flex: 1, textTransform: 'capitalize' }}>
+                    {country.toLowerCase()}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#ef4444' }}>
+                    {count}
+                  </div>
+                  {/* mini bar */}
+                  <div style={{
+                    width: 50, height: 4, background: 'var(--border)', borderRadius: 2, flexShrink: 0,
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${Math.round((count / (topCountries[0][1] as number)) * 100)}%`,
+                      background: '#ef4444', borderRadius: 2,
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+              No victim location data yet — run ransomware connectors to populate.
+            </div>
+          )}
+
+          <div style={{ marginTop: 14, display: 'flex', gap: 16 }}>
+            <LegendDot color="#ef4444" label="Ransomware victim" />
+          </div>
+        </div>
+      </div>
 
       {/* Primary stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 10 }}>
@@ -272,6 +379,15 @@ function StatCard({ label, value, color, small }: {
     }}>
       <div style={{ fontSize: small ? 18 : 24, fontWeight: 700, color }}>{(value || 0).toLocaleString()}</div>
       <div style={{ fontSize: 10, color: 'var(--text-secondary)', marginTop: 2 }}>{label}</div>
+    </div>
+  )
+}
+
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+      <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{label}</span>
     </div>
   )
 }
