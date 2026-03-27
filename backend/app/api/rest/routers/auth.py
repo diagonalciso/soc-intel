@@ -73,18 +73,66 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
     return TokenResponse(access_token=token)
 
 
+class APIKeyCreate(BaseModel):
+    label: str = "unnamed"
+
+
 @router.post("/api-keys")
 async def create_api_key(
-    name: str,
+    payload: APIKeyCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     raw, hashed = generate_api_key()
-    api_key = APIKey(name=name, key_hash=hashed, user_id=current_user.id)
+    api_key = APIKey(name=payload.label, key_hash=hashed, user_id=current_user.id)
     db.add(api_key)
     await db.commit()
+    await db.refresh(api_key)
     # Return raw key ONCE — never stored in plain text
-    return {"key": raw, "name": name, "message": "Store this key — it will not be shown again"}
+    return {
+        "key": raw,
+        "id": str(api_key.id),
+        "label": payload.label,
+        "key_prefix": raw[:8],
+        "created_at": api_key.created_at.isoformat() if api_key.created_at else None,
+        "message": "Store this key — it will not be shown again",
+    }
+
+
+@router.get("/api-keys")
+async def list_api_keys(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(APIKey).where(APIKey.user_id == current_user.id, APIKey.is_active == True)
+    )
+    keys = result.scalars().all()
+    return {
+        "api_keys": [
+            {
+                "id": str(k.id),
+                "label": k.name,
+                "key_prefix": k.key_hash[:8] if k.key_hash else "?",
+                "created_at": k.created_at.isoformat() if k.created_at else None,
+            }
+            for k in keys
+        ]
+    }
+
+
+@router.delete("/api-keys/{key_id}", status_code=204)
+async def revoke_api_key(
+    key_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    import uuid as _uuid
+    key = await db.get(APIKey, _uuid.UUID(key_id))
+    if not key or key.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="API key not found")
+    key.is_active = False
+    await db.commit()
 
 
 @router.get("/me")

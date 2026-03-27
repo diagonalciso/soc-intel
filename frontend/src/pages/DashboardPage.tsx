@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import {
   getDarkwebSummary, getRansomwareStats, getAlerts,
-  getConnectors, getIntelStats,
+  getConnectors, getIntelStats, pivotSearch,
 } from '../api/client'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -9,6 +11,24 @@ import {
 } from 'recharts'
 
 export default function DashboardPage() {
+  const nav = useNavigate()
+  const [pivotValue, setPivotValue] = useState('')
+  const [pivotQuery, setPivotQuery] = useState('')
+  const [pivotResults, setPivotResults] = useState<{ total: number; by_type: Record<string, number>; objects: unknown[] } | null>(null)
+  const [pivotLoading, setPivotLoading] = useState(false)
+
+  async function handlePivot() {
+    if (!pivotQuery.trim()) return
+    setPivotLoading(true)
+    try {
+      const res = await pivotSearch(pivotQuery.trim())
+      setPivotResults(res.data)
+    } catch {
+      // ignore
+    } finally {
+      setPivotLoading(false)
+    }
+  }
   const { data: darkwebSummary } = useQuery({
     queryKey: ['darkweb-summary'],
     queryFn: () => getDarkwebSummary().then((r) => r.data),
@@ -140,6 +160,71 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+
+      {/* Pivot Search */}
+      <div style={{ ...cardStyle, marginBottom: 16 }}>
+        <h3 style={cardTitle}>Pivot Search</h3>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <input
+            value={pivotQuery}
+            onChange={(e) => setPivotQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handlePivot()}
+            placeholder="Search by IOC, actor name, malware, CVE-ID..."
+            style={{
+              flex: 1, background: 'var(--bg-primary)', border: '1px solid var(--border)',
+              borderRadius: 4, color: 'var(--text-primary)', padding: '7px 12px', fontSize: 12,
+            }}
+          />
+          <button
+            onClick={handlePivot}
+            disabled={pivotLoading}
+            style={{
+              background: 'var(--accent)', color: '#fff', border: 'none',
+              borderRadius: 4, padding: '7px 16px', fontSize: 12, cursor: 'pointer', fontWeight: 600,
+            }}
+          >
+            {pivotLoading ? '...' : 'Search'}
+          </button>
+        </div>
+        {pivotResults && (
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 8 }}>
+              {pivotResults.total} results across {Object.keys(pivotResults.by_type).length} object types
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+              {Object.entries(pivotResults.by_type).map(([type, count]) => (
+                <span key={type} style={{
+                  fontSize: 10, padding: '2px 8px', borderRadius: 10,
+                  background: 'rgba(59,130,246,0.15)', color: '#3b82f6',
+                }}>
+                  {type} ({count})
+                </span>
+              ))}
+            </div>
+            {(pivotResults.objects as { id: string; type: string; name?: string }[]).slice(0, 8).map((obj) => (
+              <div
+                key={obj.id}
+                onClick={() => nav(`/intel/${obj.id}`)}
+                style={{
+                  padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 4,
+                  marginBottom: 4, cursor: 'pointer', display: 'flex', gap: 8, alignItems: 'center',
+                  background: 'var(--bg-primary)',
+                }}
+              >
+                <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 10, background: 'rgba(59,130,246,0.15)', color: '#3b82f6' }}>
+                  {obj.type}
+                </span>
+                <span style={{ fontSize: 12 }}>{obj.name || obj.id}</span>
+              </div>
+            ))}
+            {pivotResults.objects.length > 8 && (
+              <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 4 }}>
+                +{pivotResults.objects.length - 8} more — use Intelligence search for full results
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Connectors */}
       <div style={cardStyle}>

@@ -8,6 +8,10 @@ import ConnectorsPage from './pages/ConnectorsPage'
 import ObjectDetailPage from './pages/ObjectDetailPage'
 import AttackPage from './pages/AttackPage'
 import RulesPage from './pages/RulesPage'
+import ThreatActorsPage from './pages/ThreatActorsPage'
+import CampaignsPage from './pages/CampaignsPage'
+import AlertRulesPage from './pages/AlertRulesPage'
+import SettingsPage from './pages/SettingsPage'
 
 export default function App() {
   return (
@@ -17,11 +21,15 @@ export default function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="intel" element={<IntelPage />} />
         <Route path="intel/:stixId" element={<ObjectDetailPage />} />
+        <Route path="actors" element={<ThreatActorsPage />} />
+        <Route path="campaigns" element={<CampaignsPage />} />
         <Route path="attack" element={<AttackPage />} />
         <Route path="rules" element={<RulesPage />} />
+        <Route path="alert-rules" element={<AlertRulesPage />} />
         <Route path="cases" element={<CasesPage />} />
         <Route path="darkweb" element={<DarkWebPage />} />
         <Route path="connectors" element={<ConnectorsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
   )

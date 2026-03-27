@@ -26,6 +26,9 @@ from app.connectors.builtin.otx_import import OTXImportConnector
 from app.connectors.builtin.misp_feeds import MISPFeedsConnector
 from app.connectors.builtin.taxii_import import TAXIIImportConnector
 from app.connectors.builtin.sigma_rules import SigmaRulesConnector
+from app.connectors.builtin.malwarebazaar import MalwareBazaarConnector
+from app.connectors.builtin.phishtank import PhishTankConnector
+from app.connectors.builtin.pulsedive import PulsediveConnector
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +53,9 @@ _SOURCE_RELIABILITY: dict[str, int] = {
     "taxii":         70,
     "openphish":     68,
     "otx":           65,
+    "malwarebazaar": 75,
+    "phishtank":     72,
+    "pulsedive":     72,
 }
 
 CONNECTORS = [
@@ -71,6 +77,9 @@ CONNECTORS = [
     NVDEPSSConnector(),
     MITREAttackConnector(),
     SigmaRulesConnector(),
+    MalwareBazaarConnector(),
+    PhishTankConnector(),
+    PulsediveConnector(),
 ]
 
 # Apply reliability overrides
@@ -237,6 +246,17 @@ def setup_scheduler():
         replace_existing=True,
     )
     logger.info("Scheduled: indicator decay (daily 03:00)")
+
+    # Alert rule matcher — runs every hour
+    from app.workers.alert_matcher import run_alert_matcher
+    scheduler.add_job(
+        run_alert_matcher,
+        CronTrigger(minute=5),  # :05 past every hour
+        id="alert-matcher",
+        name="Alert Rule Matcher",
+        replace_existing=True,
+    )
+    logger.info("Scheduled: alert rule matcher (hourly :05)")
 
     scheduler.start()
     logger.info(f"Scheduler started with {len(CONNECTORS)} connectors + decay job")

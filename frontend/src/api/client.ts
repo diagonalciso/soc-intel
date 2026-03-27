@@ -126,3 +126,53 @@ export const createSighting = (data: Record<string, unknown>) =>
 
 export const getSightings = (indicatorId?: string) =>
   api.get('/sightings', { params: indicatorId ? { indicator_id: indicatorId } : undefined })
+
+// ── Pivot search ───────────────────────────────────────────────
+export const pivotSearch = (value: string, size?: number) =>
+  api.get('/intel/pivot', { params: { value, size } })
+
+// ── Campaigns + intrusion sets ────────────────────────────────
+export const getCampaigns = (params?: Record<string, unknown>) =>
+  api.get('/intel/campaigns', { params })
+
+export const getIntrusionSets = (params?: Record<string, unknown>) =>
+  api.get('/intel/intrusion-sets', { params })
+
+// ── Alert rules ───────────────────────────────────────────────
+export const getAlertRules = (params?: Record<string, unknown>) =>
+  api.get('/alert-rules', { params })
+
+export const getAlertRule = (id: string) => api.get(`/alert-rules/${id}`)
+
+export const createAlertRule = (data: Record<string, unknown>) =>
+  api.post('/alert-rules', data)
+
+export const updateAlertRule = (id: string, data: Record<string, unknown>) =>
+  api.patch(`/alert-rules/${id}`, data)
+
+export const deleteAlertRule = (id: string) => api.delete(`/alert-rules/${id}`)
+
+export const getAlertRuleConditions = () => api.get('/alert-rules/conditions')
+
+export const testAlertRule = (id: string) => api.post(`/alert-rules/${id}/test`)
+
+// ── API key management ────────────────────────────────────────
+export const listApiKeys = () => api.get('/auth/api-keys')
+
+export const createApiKey = (data: Record<string, unknown>) =>
+  api.post('/auth/api-keys', data)
+
+export const revokeApiKey = (id: string) => api.delete(`/auth/api-keys/${id}`)
+
+// ── Export ────────────────────────────────────────────────────
+export const exportStix = (params?: Record<string, unknown>) =>
+  api.get('/export/stix', { params, responseType: 'blob' })
+
+export const exportSplunkCsv = (params?: Record<string, unknown>) =>
+  api.get('/export/splunk', { params, responseType: 'blob' })
+
+export const exportElasticNdjson = (params?: Record<string, unknown>) =>
+  api.get('/export/elastic', { params, responseType: 'blob' })
+
+export const exportCsv = (params?: Record<string, unknown>) =>
+  api.get('/export/csv', { params, responseType: 'blob' })

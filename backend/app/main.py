@@ -58,6 +58,8 @@ from app.api.rest.routers.enrichment import router as enrichment_router
 from app.api.rest.routers.connectors import router as connectors_router
 from app.api.rest.routers.rules import router as rules_router
 from app.api.rest.routers.sightings import router as sightings_router
+from app.api.rest.routers.alert_rules import router as alert_rules_router
+from app.api.rest.routers.export import router as export_router
 from app.stream.sse import router as stream_router
 
 for router in [
@@ -70,6 +72,8 @@ for router in [
     connectors_router,
     rules_router,
     sightings_router,
+    alert_rules_router,
+    export_router,
     stream_router,
 ]:
     app.include_router(router, prefix="/api")

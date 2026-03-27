@@ -1,13 +1,17 @@
 import { Outlet, NavLink } from 'react-router-dom'
 
 const NAV_ITEMS = [
-  { path: '/dashboard',  label: 'Dashboard',   icon: '◈' },
-  { path: '/intel',      label: 'Intelligence', icon: '⬡' },
-  { path: '/attack',     label: 'ATT&CK',       icon: '⬛' },
-  { path: '/rules',      label: 'Rules',        icon: '◧' },
-  { path: '/cases',      label: 'Cases',        icon: '⬟' },
-  { path: '/darkweb',    label: 'Dark Web',     icon: '◉' },
-  { path: '/connectors', label: 'Connectors',   icon: '⬢' },
+  { path: '/dashboard',   label: 'Dashboard',     icon: '◈' },
+  { path: '/intel',       label: 'Intelligence',  icon: '⬡' },
+  { path: '/actors',      label: 'Threat Actors', icon: '◎' },
+  { path: '/campaigns',   label: 'Campaigns',     icon: '◌' },
+  { path: '/attack',      label: 'ATT&CK',        icon: '⬛' },
+  { path: '/rules',       label: 'Rules',         icon: '◧' },
+  { path: '/alert-rules', label: 'Alert Rules',   icon: '◆' },
+  { path: '/cases',       label: 'Cases',         icon: '⬟' },
+  { path: '/darkweb',     label: 'Dark Web',      icon: '◉' },
+  { path: '/connectors',  label: 'Connectors',    icon: '⬢' },
+  { path: '/settings',    label: 'Settings',      icon: '◐' },
 ]
 
 export default function Layout() {

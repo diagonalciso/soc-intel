@@ -191,6 +191,84 @@ async def list_vulnerabilities(
     return await engine.search(stix_type="vulnerability", query=q, from_=from_, size=size)
 
 
+@router.get("/campaigns")
+async def list_campaigns(
+    q: str | None = Query(None),
+    from_: int = Query(0, alias="from"),
+    size: int = Query(25, le=500),
+    engine: STIXEngine = Depends(get_stix_engine),
+    user: User = Depends(get_current_user),
+):
+    return await engine.search(stix_type="campaign", query=q, from_=from_, size=size)
+
+
+@router.get("/intrusion-sets")
+async def list_intrusion_sets(
+    q: str | None = Query(None),
+    from_: int = Query(0, alias="from"),
+    size: int = Query(25, le=500),
+    engine: STIXEngine = Depends(get_stix_engine),
+    user: User = Depends(get_current_user),
+):
+    return await engine.search(stix_type="intrusion-set", query=q, from_=from_, size=size)
+
+
+@router.get("/pivot")
+async def pivot_search(
+    value: str = Query(..., description="IOC value, name, or identifier to pivot on"),
+    size: int = Query(50, le=200),
+    engine: STIXEngine = Depends(get_stix_engine),
+    user: User = Depends(get_current_user),
+):
+    """
+    Cross-type pivot search.
+    Searches all STIX object types for anything referencing or matching the given value.
+    Returns hits grouped by STIX type.
+    """
+    from app.db.opensearch import get_opensearch, STIX_INDEX
+    client = get_opensearch()
+
+    body = {
+        "size": size,
+        "query": {
+            "multi_match": {
+                "query": value,
+                "fields": [
+                    "name^3",
+                    "pattern^2",
+                    "description",
+                    "aliases",
+                    "external_references.external_id",
+                    "x_clawint_malware_family",
+                    "labels",
+                ],
+                "type": "best_fields",
+                "fuzziness": "AUTO",
+            }
+        },
+        "aggs": {
+            "by_type": {"terms": {"field": "type", "size": 20}}
+        },
+    }
+
+    try:
+        resp = await client.search(index=STIX_INDEX, body=body)
+        hits = resp.get("hits", {}).get("hits", [])
+        objects = [h["_source"] for h in hits]
+        type_counts = {
+            b["key"]: b["doc_count"]
+            for b in resp.get("aggregations", {}).get("by_type", {}).get("buckets", [])
+        }
+        return {
+            "query": value,
+            "total": resp.get("hits", {}).get("total", {}).get("value", 0),
+            "by_type": type_counts,
+            "objects": objects,
+        }
+    except Exception:
+        return {"query": value, "total": 0, "by_type": {}, "objects": []}
+
+
 @router.get("/stats")
 async def get_intel_stats(
     engine: STIXEngine = Depends(get_stix_engine),
