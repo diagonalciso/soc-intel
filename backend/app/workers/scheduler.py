@@ -30,6 +30,27 @@ logger = logging.getLogger(__name__)
 
 scheduler = AsyncIOScheduler()
 
+# Source reliability overrides (0-100).
+# These are applied after connector instantiation.
+# 95 = authoritative/official, 80 = vetted community (default), 65 = open/noisy community.
+_SOURCE_RELIABILITY: dict[str, int] = {
+    "cisa-kev":      95,
+    "nvd-epss":      95,
+    "mitre-attack":  95,
+    "spamhaus-drop": 85,
+    "feodotracker":  80,
+    "ransomware-live": 80,
+    "ransomlook":    80,
+    "ransomwatch":   78,
+    "urlhaus":       75,
+    "threatfox":     75,
+    "dshield":       75,
+    "misp-feeds":    72,
+    "taxii":         70,
+    "openphish":     68,
+    "otx":           65,
+}
+
 CONNECTORS = [
     OTXImportConnector(),
     MISPFeedsConnector(),
@@ -49,6 +70,11 @@ CONNECTORS = [
     NVDEPSSConnector(),
     MITREAttackConnector(),
 ]
+
+# Apply reliability overrides
+for _c in CONNECTORS:
+    if _c.config.name in _SOURCE_RELIABILITY:
+        _c.config.source_reliability = _SOURCE_RELIABILITY[_c.config.name]
 
 
 async def _run_connector(connector):
@@ -106,6 +132,7 @@ async def _decay_indicators():
         logger.error(f"Indicator decay (expire): {e}")
 
     # 2. Reduce confidence on indicators older than 30 days
+    #    Skip indicators sighted within the last 30 days (x_clawint_last_sighted).
     try:
         resp = await client.update_by_query(
             index=STIX_INDEX,
@@ -117,7 +144,11 @@ async def _decay_indicators():
                             {"term": {"revoked": False}},
                             {"range": {"created": {"lt": cutoff_30d}}},
                             {"range": {"confidence": {"gt": 10}}},
-                        ]
+                        ],
+                        "must_not": [
+                            # Do not decay indicators that were recently sighted
+                            {"range": {"x_clawint_last_sighted": {"gte": cutoff_30d}}},
+                        ],
                     }
                 },
                 "script": {
@@ -140,6 +171,7 @@ async def _decay_indicators():
         logger.error(f"Indicator decay (confidence): {e}")
 
     # 3. Revoke very old low-confidence indicators (>90d, confidence == 10)
+    #    Skip indicators sighted within the last 30 days.
     try:
         resp = await client.update_by_query(
             index=STIX_INDEX,
@@ -151,7 +183,10 @@ async def _decay_indicators():
                             {"term": {"revoked": False}},
                             {"range": {"created": {"lt": cutoff_90d}}},
                             {"term": {"confidence": 10}},
-                        ]
+                        ],
+                        "must_not": [
+                            {"range": {"x_clawint_last_sighted": {"gte": cutoff_30d}}},
+                        ],
                     }
                 },
                 "script": {

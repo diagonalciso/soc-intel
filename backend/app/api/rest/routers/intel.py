@@ -77,12 +77,19 @@ async def delete_object(
 async def search_objects(
     type: str | None = Query(None),
     q: str | None = Query(None),
+    tlp: str | None = Query(None),
+    source: str | None = Query(None),
     from_: int = Query(0, alias="from"),
     size: int = Query(25, le=500),
     engine: STIXEngine = Depends(get_stix_engine),
     user: User = Depends(get_current_user),
 ):
-    return await engine.search(stix_type=type, query=q, from_=from_, size=size)
+    filters: dict = {}
+    if tlp:
+        filters["tlp"] = tlp
+    if source:
+        filters["x_clawint_source"] = source
+    return await engine.search(stix_type=type, query=q, filters=filters or None, from_=from_, size=size)
 
 
 @router.get("/objects/{stix_id}/relationships")

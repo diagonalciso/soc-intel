@@ -25,6 +25,11 @@ class ConnectorConfig:
     description: str = ""
     schedule: str = "0 */6 * * *"  # every 6 hours by default
     config: dict = field(default_factory=dict)
+    # Source trust: 0-100, applied to indicator confidence at ingest.
+    # 95 = official govt/authoritative, 80 = vetted community, 65 = open community.
+    source_reliability: int = 80
+    # Default TLP for objects from this connector (overridden per-object if set).
+    default_tlp: str = "TLP:CLEAR"
 
 
 @dataclass
@@ -67,6 +72,13 @@ class BaseConnector(ABC):
         """Send STIX objects to the platform's bulk ingest endpoint."""
         if not objects:
             return IngestResult()
+
+        # Stamp source reliability and default TLP onto each object if not set
+        for obj in objects:
+            if "x_clawint_source_reliability" not in obj:
+                obj["x_clawint_source_reliability"] = self.config.source_reliability
+            if "x_clawint_tlp" not in obj:
+                obj["x_clawint_tlp"] = self.config.default_tlp
 
         api_url = "http://api:8000"
         try:

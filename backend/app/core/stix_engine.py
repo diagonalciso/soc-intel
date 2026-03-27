@@ -23,6 +23,20 @@ TLP_MARKINGS = {
     "TLP:RED": "marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed",
 }
 
+_TLP_ALIASES: dict[str, str] = {
+    "white": "TLP:CLEAR", "tlp:white": "TLP:CLEAR",
+    "clear": "TLP:CLEAR", "tlp:clear": "TLP:CLEAR",
+    "green": "TLP:GREEN", "tlp:green": "TLP:GREEN",
+    "amber": "TLP:AMBER", "tlp:amber": "TLP:AMBER",
+    "amber+strict": "TLP:AMBER+STRICT", "tlp:amber+strict": "TLP:AMBER+STRICT",
+    "red": "TLP:RED",   "tlp:red":   "TLP:RED",
+}
+
+
+def _normalize_tlp(raw: str) -> str:
+    """Normalize any TLP variant to canonical form (TLP:CLEAR, TLP:GREEN, etc.)."""
+    return _TLP_ALIASES.get(raw.strip().lower(), "TLP:CLEAR")
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
@@ -240,6 +254,21 @@ class STIXEngine:
                             obj["x_clawint_fp_reason"] = reason
                     except Exception:
                         pass
+
+            # Apply source reliability to indicator confidence
+            if obj_type == "indicator":
+                reliability = obj.get("x_clawint_source_reliability", 80)
+                raw_confidence = obj.get("confidence", 60)
+                obj["confidence"] = max(10, int(raw_confidence * reliability / 100))
+
+            # Normalize TLP → set canonical `tlp` keyword field for filtering
+            raw_tlp = obj.get("x_clawint_tlp") or obj.get("tlp") or "TLP:CLEAR"
+            obj["tlp"] = _normalize_tlp(raw_tlp)
+            # Keep object_marking_refs in sync with STIX standard
+            if "object_marking_refs" not in obj:
+                marking_id = TLP_MARKINGS.get(obj["tlp"])
+                if marking_id:
+                    obj["object_marking_refs"] = [marking_id]
 
             body.append({"index": {"_index": STIX_INDEX, "_id": obj["id"]}})
             body.append(obj)

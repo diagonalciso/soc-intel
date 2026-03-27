@@ -45,6 +45,11 @@ STIX_INDEX_MAPPING = {
             "x_opencti_score": {"type": "integer"},
             "x_clawint_source": {"type": "keyword"},
             "x_clawint_darkweb": {"type": "boolean"},
+            "x_clawint_source_reliability": {"type": "integer"},
+            "x_clawint_last_sighted": {"type": "date"},
+            "x_clawint_sighting_count": {"type": "integer"},
+            "x_clawint_fp_candidate": {"type": "boolean"},
+            "tlp": {"type": "keyword"},
         }
     },
     "settings": {

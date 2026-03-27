@@ -119,3 +119,10 @@ export const updateRule = (id: string, data: Record<string, unknown>) =>
 export const deleteRule = (id: string) => api.delete(`/rules/${id}`)
 
 export const getRuleStats = () => api.get('/rules/stats')
+
+// ── Sightings ──────────────────────────────────────────────────
+export const createSighting = (data: Record<string, unknown>) =>
+  api.post('/sightings', data)
+
+export const getSightings = (indicatorId?: string) =>
+  api.get('/sightings', { params: indicatorId ? { indicator_id: indicatorId } : undefined })

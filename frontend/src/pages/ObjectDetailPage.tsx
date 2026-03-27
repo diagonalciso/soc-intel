@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import CytoscapeComponent from 'react-cytoscapejs'
-import { getObject, getObjectRelationships, getObjectGraph } from '../api/client'
+import { getObject, getObjectRelationships, getObjectGraph, getSightings, createSighting } from '../api/client'
 
 const NODE_COLORS: Record<string, string> = {
   'threat-actor':    '#ef4444',
@@ -23,9 +23,18 @@ function nodeColor(type: string, isRoot: boolean): string {
   return NODE_COLORS[type] || '#94a3b8'
 }
 
+const TLP_COLORS: Record<string, { bg: string; text: string }> = {
+  'TLP:CLEAR':        { bg: '#166534', text: '#bbf7d0' },
+  'TLP:GREEN':        { bg: '#166534', text: '#bbf7d0' },
+  'TLP:AMBER':        { bg: '#92400e', text: '#fde68a' },
+  'TLP:AMBER+STRICT': { bg: '#7c2d12', text: '#fed7aa' },
+  'TLP:RED':          { bg: '#7f1d1d', text: '#fca5a5' },
+}
+
 export default function ObjectDetailPage() {
   const { stixId } = useParams<{ stixId: string }>()
-  const navigate   = useNavigate()
+  const navigate      = useNavigate()
+  const queryClient   = useQueryClient()
   const [tab, setTab] = useState<'details' | 'graph'>('details')
   const cyRef = useRef<any>(null)
 
@@ -45,6 +54,20 @@ export default function ObjectDetailPage() {
     queryKey: ['object-graph', stixId],
     queryFn: () => getObjectGraph(stixId!).then((r) => r.data),
     enabled: !!stixId && tab === 'graph',
+  })
+
+  const { data: sightingsData } = useQuery({
+    queryKey: ['sightings', stixId],
+    queryFn: () => getSightings(stixId!).then((r) => r.data),
+    enabled: !!stixId && obj?.type === 'indicator',
+  })
+
+  const sightMutation = useMutation({
+    mutationFn: () => createSighting({ sighting_of_ref: stixId!, count: 1, source: 'manual' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sightings', stixId] })
+      queryClient.invalidateQueries({ queryKey: ['object', stixId] })
+    },
   })
 
   if (isLoading) return <div style={{ padding: 40, color: 'var(--text-secondary)' }}>Loading...</div>
@@ -87,14 +110,48 @@ export default function ObjectDetailPage() {
   return (
     <div style={{ padding: 24, maxWidth: tab === 'graph' ? '100%' : 900 }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={{
           fontSize: 11, padding: '3px 9px', borderRadius: 8,
           background: '#1e3a5f', color: '#60a5fa', fontFamily: 'monospace',
         }}>
           {obj.type}
         </span>
+        {obj.tlp && (() => {
+          const c = TLP_COLORS[obj.tlp] || { bg: '#1e293b', text: '#94a3b8' }
+          return (
+            <span style={{
+              fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 700,
+              background: c.bg, color: c.text, fontFamily: 'monospace', letterSpacing: 0.3,
+            }}>
+              {obj.tlp}
+            </span>
+          )
+        })()}
         <h1 style={{ fontSize: 20, fontWeight: 700, flex: 1 }}>{obj.name || obj.id}</h1>
+        {obj.type === 'indicator' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {(sightingsData?.total ?? obj.x_clawint_sighting_count ?? 0) > 0 && (
+              <span style={{
+                fontSize: 11, padding: '4px 10px', borderRadius: 12,
+                background: '#064e3b', color: '#6ee7b7', fontWeight: 600,
+              }}>
+                👁 {sightingsData?.total ?? obj.x_clawint_sighting_count} sighting{(sightingsData?.total ?? 1) !== 1 ? 's' : ''}
+              </span>
+            )}
+            <button
+              onClick={() => sightMutation.mutate()}
+              disabled={sightMutation.isPending}
+              style={{
+                padding: '6px 14px', fontSize: 12, fontWeight: 500,
+                background: sightMutation.isPending ? '#1e293b' : '#1d4ed8',
+                color: '#e2e8f0', border: 'none', borderRadius: 6, cursor: 'pointer',
+              }}
+            >
+              {sightMutation.isPending ? 'Reporting…' : '+ Report Sighting'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Tab bar */}
@@ -209,7 +266,8 @@ export default function ObjectDetailPage() {
       {/* Details tab */}
       {tab === 'details' && (() => {
         const customFields = Object.entries(obj).filter(
-          ([k]) => k.startsWith('x_clawint_') || k.startsWith('x_opencti_') || k.startsWith('x_cvss') || k.startsWith('x_epss') || k.startsWith('x_mitre')
+          ([k]) => (k.startsWith('x_clawint_') || k.startsWith('x_opencti_') || k.startsWith('x_cvss') || k.startsWith('x_epss') || k.startsWith('x_mitre'))
+            && k !== 'x_clawint_tlp'  // shown in header badge
         )
         return (
           <>
@@ -221,7 +279,7 @@ export default function ObjectDetailPage() {
                 Created: obj.created?.slice(0, 19).replace('T', ' '),
                 Modified: obj.modified?.slice(0, 19).replace('T', ' '),
                 Confidence: obj.confidence,
-                TLP: (obj.object_marking_refs || []).join(', '),
+                TLP: obj.tlp || (obj.object_marking_refs || []).join(', '),
                 Description: obj.description,
                 Labels: (obj.labels || []).join(', '),
                 Pattern: obj.pattern,

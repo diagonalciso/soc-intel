@@ -5,21 +5,50 @@ import { searchObjects, getThreatActors, getIndicators, getMalware, getVulnerabi
 
 type Tab = 'threat-actor' | 'indicator' | 'malware' | 'vulnerability' | 'all'
 
+const TLP_OPTIONS = ['', 'TLP:CLEAR', 'TLP:GREEN', 'TLP:AMBER', 'TLP:AMBER+STRICT', 'TLP:RED']
+
+const TLP_COLORS: Record<string, { bg: string; text: string }> = {
+  'TLP:CLEAR':        { bg: '#f0fdf4', text: '#166534' },
+  'TLP:GREEN':        { bg: '#166534', text: '#bbf7d0' },
+  'TLP:AMBER':        { bg: '#92400e', text: '#fde68a' },
+  'TLP:AMBER+STRICT': { bg: '#7c2d12', text: '#fed7aa' },
+  'TLP:RED':          { bg: '#7f1d1d', text: '#fca5a5' },
+}
+
+function TLPBadge({ tlp }: { tlp?: string }) {
+  if (!tlp) return null
+  const c = TLP_COLORS[tlp] || { bg: '#1e293b', text: '#94a3b8' }
+  return (
+    <span style={{
+      fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 700,
+      background: c.bg, color: c.text, fontFamily: 'monospace', letterSpacing: 0.3,
+      whiteSpace: 'nowrap',
+    }}>
+      {tlp}
+    </span>
+  )
+}
+
 export default function IntelPage() {
   const [tab, setTab] = useState<Tab>('all')
   const [search, setSearch] = useState('')
+  const [tlpFilter, setTlpFilter] = useState('')
 
   const queryFn = () => {
-    const params = { q: search || undefined, size: 50 }
+    const params: Record<string, unknown> = {
+      q: search || undefined,
+      size: 50,
+      tlp: tlpFilter || undefined,
+    }
     if (tab === 'threat-actor') return getThreatActors(params).then((r) => r.data)
     if (tab === 'indicator') return getIndicators(params).then((r) => r.data)
     if (tab === 'malware') return getMalware(params).then((r) => r.data)
     if (tab === 'vulnerability') return getVulnerabilities(params).then((r) => r.data)
-    return searchObjects({ type: undefined, q: search || undefined, size: 50 }).then((r) => r.data)
+    return searchObjects({ ...params, type: undefined }).then((r) => r.data)
   }
 
   const { data, isLoading } = useQuery({
-    queryKey: ['intel', tab, search],
+    queryKey: ['intel', tab, search, tlpFilter],
     queryFn,
   })
 
@@ -40,17 +69,33 @@ export default function IntelPage() {
         </div>
       </div>
 
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search intelligence objects..."
-        style={{
-          width: '100%', maxWidth: 500, padding: '8px 12px',
-          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-          borderRadius: 6, color: 'var(--text-primary)', fontSize: 13,
-          outline: 'none', marginBottom: 16,
-        }}
-      />
+      {/* Search + filters row */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search intelligence objects..."
+          style={{
+            flex: '1 1 300px', maxWidth: 500, padding: '8px 12px',
+            background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+            borderRadius: 6, color: 'var(--text-primary)', fontSize: 13, outline: 'none',
+          }}
+        />
+        <select
+          value={tlpFilter}
+          onChange={(e) => setTlpFilter(e.target.value)}
+          style={{
+            padding: '8px 12px', background: 'var(--bg-secondary)',
+            border: '1px solid var(--border)', borderRadius: 6,
+            color: 'var(--text-primary)', fontSize: 12, outline: 'none', cursor: 'pointer',
+          }}
+        >
+          <option value="">All TLP</option>
+          {TLP_OPTIONS.slice(1).map((t) => (
+            <option key={t} value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 0 }}>
@@ -80,7 +125,7 @@ export default function IntelPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                {['Type', 'Name', 'Description', 'Labels', 'Confidence', 'Modified'].map((h) => (
+                {['Type', 'Name', 'Description', 'Labels', 'TLP', 'Conf', 'Modified'].map((h) => (
                   <th key={h} style={{
                     textAlign: 'left', padding: '10px 12px', fontSize: 11,
                     color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)',
@@ -101,8 +146,8 @@ export default function IntelPage() {
                       {obj.name || obj.id.slice(0, 30) + '...'}
                     </Link>
                   </td>
-                  <td style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', maxWidth: 300 }}>
-                    <span title={obj.description}>{(obj.description || '').slice(0, 80)}{obj.description?.length > 80 ? '…' : ''}</span>
+                  <td style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-secondary)', maxWidth: 260 }}>
+                    <span title={obj.description}>{(obj.description || '').slice(0, 70)}{obj.description?.length > 70 ? '…' : ''}</span>
                   </td>
                   <td style={{ padding: '10px 12px' }}>
                     {(obj.labels || []).slice(0, 2).map((l: string) => (
@@ -113,6 +158,9 @@ export default function IntelPage() {
                         {l}
                       </span>
                     ))}
+                  </td>
+                  <td style={{ padding: '10px 12px' }}>
+                    <TLPBadge tlp={obj.tlp} />
                   </td>
                   <td style={{ padding: '10px 12px', fontSize: 12 }}>
                     {obj.confidence ?? '—'}
