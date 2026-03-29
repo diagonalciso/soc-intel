@@ -15,7 +15,7 @@ if [ ! -f .env ]; then
   echo ".env created. Review and edit it before running in production."
 fi
 
-echo "Starting CLAWINT..."
+echo "Starting SOCINT..."
 docker compose up -d
 
 echo ""
@@ -23,7 +23,7 @@ echo "Services starting:"
 echo "  Frontend:    http://localhost:3000"
 echo "  API:         http://localhost:8000/api/docs"
 echo "  OpenSearch:  http://localhost:9200"
-echo "  RabbitMQ:    http://localhost:15672  (clawint/clawint)"
-echo "  MinIO:       http://localhost:9001   (clawint/clawint123)"
+echo "  RabbitMQ:    http://localhost:15672  (socint/socint)"
+echo "  MinIO:       http://localhost:9001   (socint/socint123)"
 echo ""
 echo "Run 'docker compose logs -f' to watch logs."

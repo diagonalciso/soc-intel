@@ -40,7 +40,7 @@ class RansomwareLiveConnector(BaseConnector):
 
     async def _ingest_victims(self) -> IngestResult:
         result = IngestResult()
-        headers = {"User-Agent": "CLAWINT/1.0 CTI Platform (research)"}
+        headers = {"User-Agent": "SOCINT/1.0 CTI Platform (research)"}
         victims = None
 
         # Try v2 with extended timeout first, fall back to v1
@@ -120,7 +120,7 @@ class RansomwareLiveConnector(BaseConnector):
         try:
             resp = await self.http.get(
                 f"{self.BASE_URL}/groups",
-                headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+                headers={"User-Agent": "SOCINT/1.0 CTI Platform (research)"},
             )
             resp.raise_for_status()
             groups = resp.json()

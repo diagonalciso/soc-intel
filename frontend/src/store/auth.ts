@@ -16,15 +16,15 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  token: localStorage.getItem('clawint_token'),
+  token: localStorage.getItem('socint_token'),
   user: null,
   setToken: (token) => {
-    localStorage.setItem('clawint_token', token)
+    localStorage.setItem('socint_token', token)
     set({ token })
   },
   setUser: (user) => set({ user }),
   logout: () => {
-    localStorage.removeItem('clawint_token')
+    localStorage.removeItem('socint_token')
     set({ token: null, user: null })
   },
 }))

@@ -31,7 +31,7 @@ class PhishTankConnector(BaseConnector):
         try:
             resp = await self.http.get(
                 FEED_URL,
-                headers={"User-Agent": "phishtank/CLAWINT"},
+                headers={"User-Agent": "phishtank/SOCINT"},
                 timeout=60.0,
             )
             resp.raise_for_status()

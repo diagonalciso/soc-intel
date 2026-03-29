@@ -3,7 +3,7 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    app_name: str = "CLAWINT"
+    app_name: str = "SOCINT"
     app_env: str = "development"
     secret_key: str = "change-me"
     connector_api_key: str = "change-me-connector-key"
@@ -17,9 +17,9 @@ class Settings(BaseSettings):
     # PostgreSQL
     postgres_host: str = "localhost"
     postgres_port: int = 5432
-    postgres_db: str = "clawint"
-    postgres_user: str = "clawint"
-    postgres_password: str = "clawint"
+    postgres_db: str = "socint"
+    postgres_user: str = "socint"
+    postgres_password: str = "socint"
 
     @property
     def postgres_url(self) -> str:
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     # Redis
     redis_host: str = "localhost"
     redis_port: int = 6379
-    redis_password: str = "clawint"
+    redis_password: str = "socint"
 
     @property
     def redis_url(self) -> str:
@@ -50,8 +50,8 @@ class Settings(BaseSettings):
     # RabbitMQ
     rabbitmq_host: str = "localhost"
     rabbitmq_port: int = 5672
-    rabbitmq_user: str = "clawint"
-    rabbitmq_pass: str = "clawint"
+    rabbitmq_user: str = "socint"
+    rabbitmq_pass: str = "socint"
 
     @property
     def rabbitmq_url(self) -> str:
@@ -59,9 +59,9 @@ class Settings(BaseSettings):
 
     # MinIO
     minio_endpoint: str = "localhost:9000"
-    minio_root_user: str = "clawint"
-    minio_root_password: str = "clawint123"
-    minio_bucket: str = "clawint"
+    minio_root_user: str = "socint"
+    minio_root_password: str = "socint123"
+    minio_bucket: str = "socint"
 
     # Tor
     tor_proxy: str = "socks5://localhost:9050"

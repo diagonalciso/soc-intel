@@ -1,6 +1,6 @@
-# CLAWINT — Installation Guide
+# SOCINT — Installation Guide
 
-CLAWINT is a unified, self-hosted Cyber Threat Intelligence platform. It combines indicator management, case management, dark web tracking, enrichment, detection rules, and a connector framework into a single Docker Compose deployment.
+SOCINT is a unified, self-hosted Cyber Threat Intelligence platform. It combines indicator management, case management, dark web tracking, enrichment, detection rules, and a connector framework into a single Docker Compose deployment.
 
 ---
 
@@ -60,8 +60,8 @@ echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/diagonalciso/Clawint.git
-cd Clawint
+git clone https://github.com/diagonalciso/SOCint.git
+cd SOCint
 
 # 2. Create your .env file
 cp .env.example .env
@@ -82,7 +82,7 @@ docker compose up -d --build
 docker compose logs -f api
 ```
 
-Once you see `CLAWINT API starting up... Database ready`, the platform is ready.
+Once you see `SOCINT API starting up... Database ready`, the platform is ready.
 
 Open **http://localhost:3000** in your browser.
 
@@ -165,7 +165,7 @@ curl http://localhost:8000/api/connectors \
 
 ## 5. Connectors
 
-CLAWINT ships with 22 built-in connectors (18 import + 4 enrichment) that run automatically on schedule. All free connectors work out of the box with no API key required.
+SOCINT ships with 22 built-in connectors (18 import + 4 enrichment) that run automatically on schedule. All free connectors work out of the box with no API key required.
 
 ### Import connectors
 
@@ -304,23 +304,23 @@ This will:
 - Install Docker if not present
 - Add your user to the `docker` group
 - Create `.env` if it doesn't exist
-- Install and enable a systemd service that starts CLAWINT on boot
+- Install and enable a systemd service that starts SOCINT on boot
 
 Managing the service:
 ```bash
-sudo systemctl start clawint
-sudo systemctl stop clawint
-sudo systemctl restart clawint
-sudo systemctl status clawint
-journalctl -u clawint -f       # Follow logs
+sudo systemctl start socint
+sudo systemctl stop socint
+sudo systemctl restart socint
+sudo systemctl status socint
+journalctl -u socint -f       # Follow logs
 ```
 
 ### Reverse proxy (HTTPS)
 
-For production, put CLAWINT behind nginx or Caddy with TLS. Example Caddy config:
+For production, put SOCINT behind nginx or Caddy with TLS. Example Caddy config:
 
 ```
-clawint.yourdomain.com {
+socint.yourdomain.com {
     reverse_proxy /api/* localhost:8000
     reverse_proxy /* localhost:3000
 }
@@ -329,7 +329,7 @@ clawint.yourdomain.com {
 Update `.env`:
 ```env
 APP_ENV=production
-ALLOWED_ORIGINS=https://clawint.yourdomain.com
+ALLOWED_ORIGINS=https://socint.yourdomain.com
 ```
 
 ### Firewall
@@ -357,11 +357,11 @@ All data is stored in named Docker volumes:
 
 | Volume | Contents |
 |--------|----------|
-| `clawint_opensearch_data` | All STIX objects, indicators, dark web records, sightings |
-| `clawint_postgres_data` | Cases, users, tasks, RBAC, detection rules |
-| `clawint_redis_data` | Session cache |
-| `clawint_rabbitmq_data` | Message queue state |
-| `clawint_minio_data` | Uploaded files, reports |
+| `socint_opensearch_data` | All STIX objects, indicators, dark web records, sightings |
+| `socint_postgres_data` | Cases, users, tasks, RBAC, detection rules |
+| `socint_redis_data` | Session cache |
+| `socint_rabbitmq_data` | Message queue state |
+| `socint_minio_data` | Uploaded files, reports |
 
 Back up these volumes regularly. Example backup:
 ```bash
@@ -371,7 +371,7 @@ docker compose stop
 # Export each volume
 for vol in opensearch_data postgres_data redis_data rabbitmq_data minio_data; do
   docker run --rm \
-    -v clawint_${vol}:/data \
+    -v socint_${vol}:/data \
     -v $(pwd)/backups:/backup \
     alpine tar czf /backup/${vol}-$(date +%Y%m%d).tar.gz -C /data .
 done
@@ -446,7 +446,7 @@ docker compose start
 
 1. **Import connectors** fetch from external sources → convert to STIX 2.1 → TLP normalized + source reliability applied → POST to `/api/intel/bulk` → stored in OpenSearch with deterministic dedup
 2. **Sigma connector** fetches from SigmaHQ GitHub → parses YAML → writes directly to PostgreSQL `detection_rules` table
-3. **Dark web connectors** (ransomwatch, ransomware.live, leaksites) write directly to the `clawint-darkweb` OpenSearch index
+3. **Dark web connectors** (ransomwatch, ransomware.live, leaksites) write directly to the `socint-darkweb` OpenSearch index
 4. **Enrichment connectors** are called on-demand when an analyst queries an observable
 5. **Sightings** are stored as STIX `sighting` objects in OpenSearch; sighted indicators are flagged as decay-exempt
 6. **Frontend** reads all data via the REST API

@@ -127,7 +127,7 @@ class SigmaRulesConnector(BaseConnector):
             resp = await client.get(
                 f"{_GITHUB_API}/{path}",
                 headers={"Accept": "application/vnd.github.v3+json",
-                         "User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+                         "User-Agent": "SOCINT/1.0 CTI Platform (research)"},
             )
             if resp.status_code != 200:
                 return []
@@ -145,7 +145,7 @@ class SigmaRulesConnector(BaseConnector):
         async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
             resp = await client.get(
                 url,
-                headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+                headers={"User-Agent": "SOCINT/1.0 CTI Platform (research)"},
             )
             if resp.status_code == 200:
                 return resp.text

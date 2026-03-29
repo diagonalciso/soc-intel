@@ -1,8 +1,8 @@
-# CLAWINT
+# SOCINT
 
 **Unified, self-hosted Cyber Threat Intelligence platform.**
 
-CLAWINT combines indicator management, dark web tracking, case management, enrichment, detection rule management, and a connector framework into a single Docker Compose deployment — replacing OpenCTI + MISP + TheHive + Cortex.
+SOCINT combines indicator management, dark web tracking, case management, enrichment, detection rule management, and a connector framework into a single Docker Compose deployment — replacing OpenCTI + MISP + TheHive + Cortex.
 
 ---
 
@@ -67,8 +67,8 @@ CLAWINT combines indicator management, dark web tracking, case management, enric
 ## Quick Start
 
 ```bash
-git clone https://github.com/diagonalciso/Clawint.git
-cd Clawint
+git clone https://github.com/diagonalciso/SOCint.git
+cd SOCint
 
 cp .env.example .env
 
@@ -264,7 +264,7 @@ Register it in `backend/app/workers/scheduler.py`.
 Test all connectors against live sources without needing the full stack:
 
 ```bash
-cd /path/to/clawint
+cd /path/to/socint
 pip install -r backend/requirements.txt
 python validate_connectors.py
 ```

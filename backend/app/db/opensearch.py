@@ -18,9 +18,9 @@ def get_opensearch() -> AsyncOpenSearch:
 
 
 # Index names
-STIX_INDEX = "clawint-stix"
-INDICATORS_INDEX = "clawint-indicators"
-DARKWEB_INDEX = "clawint-darkweb"
+STIX_INDEX = "socint-stix"
+INDICATORS_INDEX = "socint-indicators"
+DARKWEB_INDEX = "socint-darkweb"
 
 
 STIX_INDEX_MAPPING = {

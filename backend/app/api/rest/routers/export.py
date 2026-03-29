@@ -59,7 +59,7 @@ async def export_stix_bundle(
     return StreamingResponse(
         _stream(),
         media_type="application/json",
-        headers={"Content-Disposition": f'attachment; filename="clawint-export-{_date()}.json"'},
+        headers={"Content-Disposition": f'attachment; filename="socint-export-{_date()}.json"'},
     )
 
 
@@ -115,7 +115,7 @@ async def export_splunk_csv(
     return StreamingResponse(
         iter([content]),
         media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="clawint-splunk-{_date()}.csv"'},
+        headers={"Content-Disposition": f'attachment; filename="socint-splunk-{_date()}.csv"'},
     )
 
 
@@ -146,7 +146,7 @@ async def export_elastic_ndjson(
     objects = result.get("objects", [])
 
     lines: list[str] = []
-    index_name = "threat-intel-clawint"
+    index_name = "threat-intel-socint"
 
     for obj in objects:
         meta = json.dumps({"index": {"_index": index_name, "_id": obj.get("id", "")}})
@@ -159,7 +159,7 @@ async def export_elastic_ndjson(
     return StreamingResponse(
         iter([content]),
         media_type="application/x-ndjson",
-        headers={"Content-Disposition": f'attachment; filename="clawint-elastic-{_date()}.ndjson"'},
+        headers={"Content-Disposition": f'attachment; filename="socint-elastic-{_date()}.ndjson"'},
     )
 
 
@@ -213,7 +213,7 @@ async def export_csv(
     return StreamingResponse(
         iter([content]),
         media_type="text/csv",
-        headers={"Content-Disposition": f'attachment; filename="clawint-export-{_date()}.csv"'},
+        headers={"Content-Disposition": f'attachment; filename="socint-export-{_date()}.csv"'},
     )
 
 
@@ -267,7 +267,7 @@ def _to_ecs(obj: dict) -> dict:
                 "confidence": _ecs_confidence(obj.get("confidence", 50)),
                 "name": obj.get("name", ""),
                 "description": obj.get("description", ""),
-                "provider": obj.get("x_clawint_source", "clawint"),
+                "provider": obj.get("x_clawint_source", "socint"),
                 "first_seen": obj.get("valid_from") or obj.get("created"),
                 "last_seen": obj.get("modified") or obj.get("created"),
                 "tlp": obj.get("tlp") or obj.get("x_clawint_tlp", ""),
@@ -282,7 +282,7 @@ def _to_ecs(obj: dict) -> dict:
             "type": ["indicator"],
         },
         "tags": obj.get("labels", []),
-        "clawint": {
+        "socint": {
             "stix_id": obj.get("id"),
             "source": obj.get("x_clawint_source"),
             "source_reliability": obj.get("x_clawint_source_reliability"),

@@ -82,7 +82,7 @@ export default function SettingsPage() {
       <div style={sectionStyle}>
         <h2 style={sectionTitle}>API Keys</h2>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14 }}>
-          API keys allow programmatic access to CLAWINT. Pass as:{' '}
+          API keys allow programmatic access to SOCINT. Pass as:{' '}
           <code style={codeStyle}>Authorization: Bearer &lt;key&gt;</code>
         </div>
 
@@ -208,7 +208,7 @@ export default function SettingsPage() {
       <div style={sectionStyle}>
         <h2 style={sectionTitle}>System</h2>
         <div style={{ fontSize: 13 }}>
-          <Row label="Platform" value="CLAWINT v0.1.0" />
+          <Row label="Platform" value="SOCINT v0.1.0" />
           <Row label="API Docs" value={<a href="/api/docs" target="_blank" style={{ color: 'var(--accent)' }}>/api/docs</a>} />
           <Row label="OpenSearch Dashboards" value={<a href="http://localhost:5601" target="_blank" style={{ color: 'var(--accent)' }}>localhost:5601</a>} />
           <Row label="RabbitMQ Management" value={<a href="http://localhost:15672" target="_blank" style={{ color: 'var(--accent)' }}>localhost:15672</a>} />

@@ -14,8 +14,8 @@ from app.auth.security import hash_password
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_ORG   = os.getenv("SEED_ORG",      "CLAWINT")
-DEFAULT_EMAIL = os.getenv("SEED_EMAIL",     "admin@clawint.internal")
+DEFAULT_ORG   = os.getenv("SEED_ORG",      "SOCINT")
+DEFAULT_EMAIL = os.getenv("SEED_EMAIL",     "admin@socint.internal")
 DEFAULT_USER  = os.getenv("SEED_USERNAME",  "admin")
 DEFAULT_PASS  = os.getenv("SEED_PASSWORD",  "changeme123!")
 

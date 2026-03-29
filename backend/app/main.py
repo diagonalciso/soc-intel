@@ -20,7 +20,7 @@ logging.basicConfig(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    logging.info("CLAWINT API starting up...")
+    logging.info("SOCINT API starting up...")
     await create_tables()
     await ensure_indices()
     async with AsyncSessionLocal() as db:
@@ -28,11 +28,11 @@ async def lifespan(app: FastAPI):
     logging.info("Database ready")
     yield
     # Shutdown
-    logging.info("CLAWINT API shutting down")
+    logging.info("SOCINT API shutting down")
 
 
 app = FastAPI(
-    title="CLAWINT",
+    title="SOCINT",
     description="Unified Cyber Threat Intelligence Platform",
     version="0.1.0",
     lifespan=lifespan,
@@ -86,4 +86,4 @@ async def health():
 
 @app.get("/")
 async def root():
-    return {"name": "CLAWINT", "docs": "/api/docs"}
+    return {"name": "SOCINT", "docs": "/api/docs"}

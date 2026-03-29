@@ -59,7 +59,7 @@ export default function ThreatActorsPage() {
     <div style={{ padding: 16 }}>
       <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Threat Actors</h1>
       <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>
-        Nation-state actors, criminal groups, and hacktivists tracked in CLAWINT
+        Nation-state actors, criminal groups, and hacktivists tracked in SOCINT
       </div>
 
       {/* Threat Actors */}

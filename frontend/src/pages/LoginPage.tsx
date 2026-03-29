@@ -42,7 +42,7 @@ export default function LoginPage() {
       }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: 3, color: 'var(--accent)' }}>
-            CLAWINT
+            SOCINT
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
             Threat Intelligence Platform

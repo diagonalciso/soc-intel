@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 async def main():
-    logger.info("CLAWINT Worker starting...")
+    logger.info("SOCINT Worker starting...")
     setup_scheduler()
 
     stop_event = asyncio.Event()

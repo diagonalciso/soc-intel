@@ -36,7 +36,7 @@ class DeepDarkCTIConnector(BaseConnector):
         try:
             resp = await self.http.get(
                 RANSOMWARE_GANG_URL,
-                headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+                headers={"User-Agent": "SOCINT/1.0 CTI Platform (research)"},
             )
             resp.raise_for_status()
             content = resp.text

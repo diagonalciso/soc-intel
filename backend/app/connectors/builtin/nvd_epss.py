@@ -105,7 +105,7 @@ class NVDEPSSConnector(BaseConnector):
             "startIndex":       0,
         }
 
-        headers = {"User-Agent": "CLAWINT/1.0 CTI Platform (research)"}
+        headers = {"User-Agent": "SOCINT/1.0 CTI Platform (research)"}
         from app.config import get_settings
         settings = get_settings()
         if getattr(settings, "nvd_api_key", None):
@@ -209,7 +209,7 @@ class NVDEPSSConnector(BaseConnector):
                 resp = await self.http.get(
                     EPSS_URL,
                     params={"cve": ",".join(batch)},
-                    headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+                    headers={"User-Agent": "SOCINT/1.0 CTI Platform (research)"},
                 )
                 if resp.status_code == 200:
                     data = resp.json()

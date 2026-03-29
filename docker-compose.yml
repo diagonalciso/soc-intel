@@ -18,7 +18,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
-    networks: [clawint]
+    networks: [socint]
 
   # ── Worker (connector + enrichment processor) ────────────────
   worker:
@@ -30,7 +30,7 @@ services:
       - api
     volumes:
       - ./backend:/app
-    networks: [clawint]
+    networks: [socint]
 
   # ── Frontend ─────────────────────────────────────────────────
   frontend:
@@ -40,7 +40,7 @@ services:
       - "3000:3000"
     environment:
       - VITE_API_URL=http://localhost:8000
-    networks: [clawint]
+    networks: [socint]
 
   # ── OpenSearch ───────────────────────────────────────────────
   opensearch:
@@ -67,7 +67,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks: [clawint]
+    networks: [socint]
 
   # ── OpenSearch Dashboards (optional) ────────────────────────
   opensearch-dashboards:
@@ -81,50 +81,50 @@ services:
     depends_on:
       opensearch:
         condition: service_healthy
-    networks: [clawint]
+    networks: [socint]
 
   # ── PostgreSQL ───────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-clawint}
-      POSTGRES_USER: ${POSTGRES_USER:-clawint}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clawint}
+      POSTGRES_DB: ${POSTGRES_DB:-socint}
+      POSTGRES_USER: ${POSTGRES_USER:-socint}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-socint}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-clawint}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-socint}"]
       interval: 5s
       timeout: 3s
       retries: 10
-    networks: [clawint]
+    networks: [socint]
 
   # ── Redis ────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: redis-server --requirepass ${REDIS_PASSWORD:-clawint}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-socint}
     volumes:
       - redis_data:/data
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-clawint}", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-socint}", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
-    networks: [clawint]
+    networks: [socint]
 
   # ── RabbitMQ ─────────────────────────────────────────────────
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-clawint}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-clawint}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-socint}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-socint}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     ports:
@@ -135,7 +135,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks: [clawint]
+    networks: [socint]
 
   # ── MinIO ────────────────────────────────────────────────────
   minio:
@@ -143,8 +143,8 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-clawint}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-clawint123}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-socint}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-socint123}
     volumes:
       - minio_data:/data
     ports:
@@ -155,7 +155,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    networks: [clawint]
+    networks: [socint]
 
   # ── Tor Proxy (dark web connectors) ─────────────────────────
   tor:
@@ -164,7 +164,7 @@ services:
     ports:
       - "9050:9050"
       - "8118:8118"
-    networks: [clawint]
+    networks: [socint]
 
 volumes:
   opensearch_data:
@@ -174,5 +174,5 @@ volumes:
   minio_data:
 
 networks:
-  clawint:
+  socint:
     driver: bridge

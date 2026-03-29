@@ -34,7 +34,7 @@ def decode_token(token: str) -> dict:
 
 def generate_api_key() -> tuple[str, str]:
     """Returns (raw_key, hashed_key). Store only the hash."""
-    raw = f"clawint-{secrets.token_urlsafe(32)}"
+    raw = f"socint-{secrets.token_urlsafe(32)}"
     hashed = hashlib.sha256(raw.encode()).hexdigest()
     return raw, hashed
 

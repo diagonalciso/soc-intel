@@ -115,7 +115,7 @@ class RansomLookConnector(BaseConnector):
             try:
                 resp = await self.http.get(
                     f"{self.BASE_URL}{endpoint}",
-                    headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+                    headers={"User-Agent": "SOCINT/1.0 CTI Platform (research)"},
                 )
                 if resp.status_code == 200:
                     data = resp.json()
@@ -132,7 +132,7 @@ class RansomLookConnector(BaseConnector):
         try:
             resp = await self.http.get(
                 f"{self.BASE_URL}/api/groups",
-                headers={"User-Agent": "CLAWINT/1.0 CTI Platform (research)"},
+                headers={"User-Agent": "SOCINT/1.0 CTI Platform (research)"},
             )
             if resp.status_code != 200:
                 return {}

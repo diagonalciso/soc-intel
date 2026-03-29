@@ -2,11 +2,11 @@
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SERVICE_NAME="clawint"
+SERVICE_NAME="socint"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 USER_NAME="$(whoami)"
 
-echo "=== CLAWINT Service Installer ==="
+echo "=== SOCINT Service Installer ==="
 echo "Project: $PROJECT_DIR"
 echo "User:    $USER_NAME"
 echo ""
@@ -54,8 +54,8 @@ echo "[4/4] Installing systemd service: $SERVICE_FILE"
 
 cat > "$SERVICE_FILE" <<EOF
 [Unit]
-Description=CLAWINT Threat Intelligence Platform
-Documentation=https://github.com/openclaw/clawint
+Description=SOCINT Threat Intelligence Platform
+Documentation=https://github.com/openclaw/socint
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
@@ -77,7 +77,7 @@ TimeoutStopSec=120
 
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=clawint
+SyslogIdentifier=socint
 
 [Install]
 WantedBy=multi-user.target
@@ -90,12 +90,12 @@ echo ""
 echo "=== Installation complete ==="
 echo ""
 echo "Commands:"
-echo "  Start:   systemctl start clawint"
-echo "  Stop:    systemctl stop clawint"
-echo "  Status:  systemctl status clawint"
-echo "  Logs:    journalctl -u clawint -f"
+echo "  Start:   systemctl start socint"
+echo "  Stop:    systemctl stop socint"
+echo "  Status:  systemctl status socint"
+echo "  Logs:    journalctl -u socint -f"
 echo ""
-echo "Starting CLAWINT now..."
+echo "Starting SOCINT now..."
 systemctl start "$SERVICE_NAME"
 echo ""
 systemctl status "$SERVICE_NAME" --no-pager

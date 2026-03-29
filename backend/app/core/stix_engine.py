@@ -1,6 +1,6 @@
 """
 Core STIX 2.1 engine — CRUD for all STIX objects stored in OpenSearch.
-All objects stored as-is STIX JSON with clawint extensions.
+All objects stored as-is STIX JSON with socint extensions.
 """
 import hashlib
 import re

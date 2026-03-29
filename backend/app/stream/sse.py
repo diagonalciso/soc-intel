@@ -16,7 +16,7 @@ from app.models.user import User
 
 router = APIRouter(prefix="/stream", tags=["stream"])
 
-STREAM_CHANNEL = "clawint:stix:stream"
+STREAM_CHANNEL = "socint:stix:stream"
 
 
 async def _event_generator(request: Request, redis: aioredis.Redis) -> AsyncGenerator[str, None]:
