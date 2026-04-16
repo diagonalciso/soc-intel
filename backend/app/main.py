@@ -61,6 +61,7 @@ from app.api.rest.routers.sightings import router as sightings_router
 from app.api.rest.routers.alert_rules import router as alert_rules_router
 from app.api.rest.routers.export import router as export_router
 from app.stream.sse import router as stream_router
+from app.api.rest.routers.compliance import router as compliance_router
 
 for router in [
     auth_router,
@@ -75,6 +76,7 @@ for router in [
     alert_rules_router,
     export_router,
     stream_router,
+    compliance_router,
 ]:
     app.include_router(router, prefix="/api")
 

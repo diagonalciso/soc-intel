@@ -53,6 +53,8 @@ class DetectionRule(Base):
     linked_stix_ids: Mapped[list] = mapped_column(JSON, default=list)
     # MITRE ATT&CK technique IDs covered by this rule (e.g. ["T1566", "T1059.001"])
     mitre_techniques: Mapped[list] = mapped_column(JSON, default=list)
+    # NIST SP 800-53 Rev 5 control IDs this rule satisfies (e.g. ["AC-2", "SI-3"])
+    nist_800_53: Mapped[list] = mapped_column(JSON, default=list)
 
     organization_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=True

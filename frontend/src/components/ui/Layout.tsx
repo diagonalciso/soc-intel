@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { path: '/cases',       label: 'Cases',         icon: '⬟' },
   { path: '/darkweb',     label: 'Dark Web',      icon: '◉' },
   { path: '/connectors',  label: 'Connectors',    icon: '⬢' },
+  { path: '/compliance',  label: 'Compliance',    icon: '◫' },
   { path: '/settings',    label: 'Settings',      icon: '◐' },
 ]
 

@@ -12,6 +12,7 @@ import ThreatActorsPage from './pages/ThreatActorsPage'
 import CampaignsPage from './pages/CampaignsPage'
 import AlertRulesPage from './pages/AlertRulesPage'
 import SettingsPage from './pages/SettingsPage'
+import CompliancePage from './pages/CompliancePage'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="darkweb" element={<DarkWebPage />} />
         <Route path="connectors" element={<ConnectorsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="compliance" element={<CompliancePage />} />
       </Route>
     </Routes>
   )

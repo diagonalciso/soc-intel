@@ -32,6 +32,8 @@ from app.connectors.builtin.pulsedive import PulsediveConnector
 from app.connectors.builtin.osv import OSVConnector
 from app.connectors.builtin.urlscan import URLScanConnector
 from app.connectors.builtin.vulncheck_kev import VulnCheckKEVConnector
+from app.connectors.builtin.nist_800_53 import NIST80053Connector
+from app.connectors.builtin.nist_csf import NISTCSFConnector
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +64,8 @@ _SOURCE_RELIABILITY: dict[str, int] = {
     "osv-dev":       85,
     "urlscan-io":    72,
     "vulncheck-kev": 90,
+    "nist-800-53":   98,
+    "nist-csf":      98,
 }
 
 CONNECTORS = [
@@ -89,6 +93,8 @@ CONNECTORS = [
     OSVConnector(),
     URLScanConnector(),
     VulnCheckKEVConnector(),
+    NIST80053Connector(),
+    NISTCSFConnector(),
 ]
 
 # Apply reliability overrides

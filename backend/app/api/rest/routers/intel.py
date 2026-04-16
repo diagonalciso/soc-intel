@@ -2,6 +2,7 @@
 STIX intelligence REST endpoints.
 Full CRUD for all STIX 2.1 object types.
 """
+import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from typing import Any
@@ -298,3 +299,34 @@ async def get_intel_stats(
         return {"total": total, "by_type": by_type, "by_source": by_source}
     except Exception as e:
         return {"total": 0, "by_type": {}, "by_source": {}}
+
+
+_PATTERN_IP_RE = re.compile(r"=\s*['\"]([^'\"]+)['\"]")
+_EXCLUDE_IPS = {"10.10.0.40"}
+
+
+@router.get("/honeypot-ips")
+async def honeypot_ips(
+    size: int = Query(1000, le=5000),
+    engine: STIXEngine = Depends(get_stix_engine),
+    user: User = Depends(get_current_user),
+):
+    """Return unique attacker IPs from DShield honeypot indicators, excluding internal addresses."""
+    result = await engine.search(
+        stix_type="indicator",
+        filters={"x_clawint_source": "dshield"},
+        from_=0,
+        size=size,
+    )
+    seen: set[str] = set()
+    ips: list[str] = []
+    for obj in result.get("objects", []):
+        m = _PATTERN_IP_RE.search(obj.get("pattern", ""))
+        if not m:
+            continue
+        ip = m.group(1).split("/")[0]
+        if ip in _EXCLUDE_IPS or ip in seen:
+            continue
+        seen.add(ip)
+        ips.append(ip)
+    return {"ips": ips, "total": len(ips)}

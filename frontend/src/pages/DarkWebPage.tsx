@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   getRansomwareLeaks, getRansomwareStats, getCredentialExposures,
-  getIABListings, getStealerLogs,
+  getIABListings, getStealerLogs, getHoneypotIps,
 } from '../api/client'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 
-type Tab = 'ransomware' | 'credentials' | 'iab' | 'stealer'
+type Tab = 'ransomware' | 'credentials' | 'iab' | 'stealer' | 'honeypot'
 
 export default function DarkWebPage() {
   const [tab, setTab] = useState<Tab>('ransomware')
@@ -39,6 +39,12 @@ export default function DarkWebPage() {
     queryKey: ['stealer-logs'],
     queryFn: () => getStealerLogs({ size: 50 }).then((r) => r.data),
     enabled: tab === 'stealer',
+  })
+
+  const { data: honeypot } = useQuery({
+    queryKey: ['honeypot-ips'],
+    queryFn: () => getHoneypotIps().then((r) => r.data),
+    enabled: tab === 'honeypot',
   })
 
   const byCountry = Object.entries(stats?.by_country || {})
@@ -81,6 +87,7 @@ export default function DarkWebPage() {
           ['credentials', 'Credential Exposures'],
           ['iab', 'IAB Listings'],
           ['stealer', 'Stealer Logs'],
+          ['honeypot', 'Honeypot IPs'],
         ] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
@@ -130,6 +137,10 @@ export default function DarkWebPage() {
 
         {tab === 'stealer' && (
           <StealerTable data={stealer?.objects || []} />
+        )}
+
+        {tab === 'honeypot' && (
+          <HoneypotTable ips={honeypot?.ips || []} />
         )}
       </div>
     </div>
@@ -242,6 +253,37 @@ function StealerTable({ data }: { data: any[] }) {
             <td style={tdStyle}>{(row.domains || []).slice(0, 3).join(', ')}{(row.domains?.length || 0) > 3 ? '...' : ''}</td>
             <td style={tdStyle}>{row.date_exfiltrated?.slice(0, 10) || '—'}</td>
             <td style={tdStyle}>{row.source}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+function HoneypotTable({ ips }: { ips: string[] }) {
+  if (!ips.length) return <Empty />
+  return (
+    <table style={tableStyle}>
+      <thead>
+        <tr>
+          <th style={thStyle}>#</th>
+          <th style={thStyle}>IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {ips.map((ip, i) => (
+          <tr key={ip} style={{ borderBottom: '1px solid #1a2030' }}>
+            <td style={{ ...tdStyle, color: 'var(--text-secondary)', width: 48 }}>{i + 1}</td>
+            <td style={tdStyle}>
+              <a
+                href={`https://www.abuseipdb.com/check/${ip}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--accent)', textDecoration: 'none', fontFamily: 'monospace' }}
+              >
+                {ip}
+              </a>
+            </td>
           </tr>
         ))}
       </tbody>

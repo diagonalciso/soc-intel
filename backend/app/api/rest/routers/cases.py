@@ -29,6 +29,8 @@ class CaseUpdate(BaseModel):
     status: CaseStatus | None = None
     tlp: str | None = None
     tags: list[str] | None = None
+    nist_800_53: list[str] | None = None
+    csf_tags: list[str] | None = None
 
 
 class TaskCreate(BaseModel):
@@ -248,6 +250,8 @@ def _case_dict(c: Case) -> dict:
         "tlp": c.tlp,
         "tags": c.tags,
         "stix_refs": c.stix_refs,
+        "nist_800_53": c.nist_800_53 or [],
+        "csf_tags": c.csf_tags or [],
         "created_at": c.created_at.isoformat(),
         "updated_at": c.updated_at.isoformat(),
     }

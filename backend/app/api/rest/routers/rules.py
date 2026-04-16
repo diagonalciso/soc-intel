@@ -29,6 +29,7 @@ class RuleCreate(BaseModel):
     status: RuleStatus = RuleStatus.active
     linked_stix_ids: list[str] = []
     mitre_techniques: list[str] = []
+    nist_800_53: list[str] = []
 
 
 class RuleUpdate(BaseModel):
@@ -41,6 +42,7 @@ class RuleUpdate(BaseModel):
     status: RuleStatus | None = None
     linked_stix_ids: list[str] | None = None
     mitre_techniques: list[str] | None = None
+    nist_800_53: list[str] | None = None
 
 
 def _rule_to_dict(r: DetectionRule) -> dict:
@@ -56,6 +58,7 @@ def _rule_to_dict(r: DetectionRule) -> dict:
         "status":           r.status,
         "linked_stix_ids":  r.linked_stix_ids or [],
         "mitre_techniques": r.mitre_techniques or [],
+        "nist_800_53":      r.nist_800_53 or [],
         "created_at":       r.created_at.isoformat() if r.created_at else None,
         "updated_at":       r.updated_at.isoformat() if r.updated_at else None,
     }
@@ -78,6 +81,7 @@ async def create_rule(
         status=payload.status,
         linked_stix_ids=payload.linked_stix_ids,
         mitre_techniques=payload.mitre_techniques,
+        nist_800_53=payload.nist_800_53,
         created_by_id=user.id,
         organization_id=user.organization_id,
     )

@@ -68,6 +68,10 @@ class Case(Base):
     # Linked STIX objects (stored as IDs referencing OpenSearch)
     stix_refs: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
+    # Compliance tagging
+    nist_800_53: Mapped[list | None] = mapped_column(JSON, nullable=True)  # e.g. ["AC-2", "IR-4"]
+    csf_tags: Mapped[list | None] = mapped_column(JSON, nullable=True)     # e.g. ["DE.AE-08", "RS.MA-03"]
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

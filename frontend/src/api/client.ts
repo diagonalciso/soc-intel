@@ -101,6 +101,9 @@ export const triggerConnector = (name: string) =>
 // ── Intel stats ───────────────────────────────────────────────
 export const getIntelStats = () => api.get('/intel/stats')
 
+// ── Honeypot IPs ──────────────────────────────────────────────
+export const getHoneypotIps = () => api.get('/intel/honeypot-ips')
+
 // ── Object graph ──────────────────────────────────────────────
 export const getObjectGraph = (id: string) => api.get(`/intel/objects/${id}/graph`)
 
