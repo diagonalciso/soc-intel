@@ -87,6 +87,7 @@ class Settings(BaseSettings):
     vulncheck_api_key: str = ""
     urlscan_api_key: str = ""
     hybrid_analysis_api_key: str = ""
+    malpedia_api_key: str = ""
 
     class Config:
         env_file = ".env"

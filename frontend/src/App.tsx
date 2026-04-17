@@ -7,6 +7,7 @@ import DarkWebPage from './pages/DarkWebPage'
 import ConnectorsPage from './pages/ConnectorsPage'
 import ObjectDetailPage from './pages/ObjectDetailPage'
 import AttackPage from './pages/AttackPage'
+import HuntingPage from './pages/HuntingPage'
 import RulesPage from './pages/RulesPage'
 import ThreatActorsPage from './pages/ThreatActorsPage'
 import CampaignsPage from './pages/CampaignsPage'
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="actors" element={<ThreatActorsPage />} />
         <Route path="campaigns" element={<CampaignsPage />} />
         <Route path="attack" element={<AttackPage />} />
+        <Route path="hunting" element={<HuntingPage />} />
         <Route path="rules" element={<RulesPage />} />
         <Route path="alert-rules" element={<AlertRulesPage />} />
         <Route path="cases" element={<CasesPage />} />

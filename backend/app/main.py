@@ -62,6 +62,7 @@ from app.api.rest.routers.alert_rules import router as alert_rules_router
 from app.api.rest.routers.export import router as export_router
 from app.stream.sse import router as stream_router
 from app.api.rest.routers.compliance import router as compliance_router
+from app.api.rest.routers.hunting import router as hunting_router
 
 for router in [
     auth_router,
@@ -77,6 +78,7 @@ for router in [
     export_router,
     stream_router,
     compliance_router,
+    hunting_router,
 ]:
     app.include_router(router, prefix="/api")
 

@@ -27,6 +27,8 @@ from app.connectors.builtin.misp_feeds import MISPFeedsConnector
 from app.connectors.builtin.taxii_import import TAXIIImportConnector
 from app.connectors.builtin.sigma_rules import SigmaRulesConnector
 from app.connectors.builtin.malwarebazaar import MalwareBazaarConnector
+from app.connectors.builtin.malpedia import MalpediaConnector
+from app.connectors.builtin.yara_rules import YaraRulesConnector
 from app.connectors.builtin.phishtank import PhishTankConnector
 from app.connectors.builtin.pulsedive import PulsediveConnector
 from app.connectors.builtin.osv import OSVConnector
@@ -66,6 +68,8 @@ _SOURCE_RELIABILITY: dict[str, int] = {
     "vulncheck-kev": 90,
     "nist-800-53":   98,
     "nist-csf":      98,
+    "malpedia":      85,
+    "yara-rules":    80,
 }
 
 CONNECTORS = [
@@ -88,6 +92,8 @@ CONNECTORS = [
     MITREAttackConnector(),
     SigmaRulesConnector(),
     MalwareBazaarConnector(),
+    MalpediaConnector(),
+    YaraRulesConnector(),
     PhishTankConnector(),
     PulsediveConnector(),
     OSVConnector(),

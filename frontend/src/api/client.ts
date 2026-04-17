@@ -134,6 +134,16 @@ export const getSightings = (indicatorId?: string) =>
 export const pivotSearch = (value: string, size?: number) =>
   api.get('/intel/pivot', { params: { value, size } })
 
+// ── Threat Hunting ──────────────────────────────────────────────
+export const huntingPivot = (q: string, size: number = 20) =>
+  api.get('/hunting/pivot', { params: { q, size } })
+
+export const getMalwareFamilies = (q?: string, from: number = 0, size: number = 20) =>
+  api.get('/hunting/malware-families', { params: { q, from, size } })
+
+export const getMalwareFamilyProfile = (familyName: string) =>
+  api.get(`/hunting/malware/${familyName}`)
+
 // ── Campaigns + intrusion sets ────────────────────────────────
 export const getCampaigns = (params?: Record<string, unknown>) =>
   api.get('/intel/campaigns', { params })
