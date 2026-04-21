@@ -2,16 +2,78 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## What Is SOCint?
+
+SOCint is a **threat intelligence platform** — think of it as Google for security threats. It:
+- Automatically collects threat data from 22 external feeds (vulnerability databases, ransomware trackers, hacker forums, etc.)
+- Stores everything as STIX 2.1 (industry-standard threat format)
+- Lets you search for threats (IPs, domains, malware hashes, ransomware gangs)
+- Shows relationships between threats
+- Tracks dark web activity targeting your organization
+- Manages incident investigations through cases
+- Provides detection rules for your SIEM
+
+**Key architectural insight:** This is NOT a log aggregator (like Wazuh). It's a separate system that enriches Wazuh alerts with external threat intelligence.
+
 ## Project Overview
 
-SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 26 built-in data connectors, on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack.
+SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 22 built-in data connectors, on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack with:
+- **Backend:** Python FastAPI server (REST + GraphQL)
+- **Frontend:** React 18 + Vite (modern, fast)
+- **Database:** PostgreSQL (structured data) + OpenSearch (threat indices)
+- **Services:** Redis (cache), RabbitMQ (queuing), Tor (dark web)
+- **Workers:** APScheduler running connector jobs + background tasks
 
-## Commands
+## Quick Start
+
+### First Time Setup
+
+**Step 1: Prepare environment**
+```bash
+cd ~/claude/socint
+cp .env.example .env
+chmod 600 .env
+
+# Generate secret keys (paste output into .env)
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+**Step 2: Edit .env with:**
+```env
+SECRET_KEY=<paste generated secret>
+CONNECTOR_API_KEY=<paste another generated secret>
+SEED_ADMIN_PASSWORD=YourAdminPassword123!
+OTX_API_KEY=<optional, from otx.alienvault.com>
+```
+
+**Step 3: Ensure OpenSearch memory (once per system)**
+```bash
+sudo sysctl -w vm.max_map_count=262144
+```
+
+**Step 4: Start everything**
+```bash
+docker compose up -d --build
+```
+
+Monitor startup:
+```bash
+docker compose logs -f app
+```
+
+Wait for: `INFO     Application startup complete`
+
+Then access at `http://localhost:3000` (admin / password from .env)
+
+---
+
+## Development Commands
 
 ### Full Stack (recommended)
 ```bash
-cp .env.example .env   # configure secrets first
 docker compose up -d --build
+docker compose logs -f app          # Watch startup
+curl http://localhost:8000/api/docs # API reference
 ```
 
 ### Backend (standalone)
