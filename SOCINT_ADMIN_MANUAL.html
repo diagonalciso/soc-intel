@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCint Admin Manual</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #c41e3a; border-bottom: 3px solid #c41e3a; padding-bottom: 15px; margin-bottom: 30px; font-size: 2.5em; }
+        h2 { color: #d42e4a; margin-top: 40px; margin-bottom: 20px; padding-left: 10px; border-left: 4px solid #d42e4a; }
+        h3 { color: #e03e5a; margin-top: 25px; margin-bottom: 15px; }
+        h4 { color: #ec4e6a; margin-top: 15px; margin-bottom: 10px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        ul, ol { margin-left: 30px; margin-bottom: 15px; }
+        li { margin-bottom: 10px; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; color: #d63384; }
+        pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; overflow-x: auto; margin-bottom: 15px; }
+        pre code { color: inherit; padding: 0; background: none; }
+        .note { background: #e8f4f8; border-left: 4px solid #0066cc; padding: 15px; margin: 20px 0; border-radius: 3px; }
+        .warning { background: #fff3cd; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; border-radius: 3px; }
+        .danger { background: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 3px; }
+        .success { background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 3px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f0f0f0; font-weight: bold; color: #c41e3a; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .toc { background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; padding: 20px; margin: 20px 0; }
+        .toc h3 { margin-top: 0; }
+        .toc ul { margin: 10px 0; }
+        .toc a { color: #c41e3a; text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        .step { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #d42e4a; }
+        .connector-card { background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; padding: 15px; margin: 15px 0; }
+        kbd { background: #333; color: white; padding: 3px 8px; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<h1>⚙️ SOCint Administrator Manual</h1>
+<p style="font-size: 1.1em; color: #666; margin-bottom: 30px;">
+    <strong>Version 1.0</strong> | Complete guide for system administrators and DevOps engineers
+</p>
+
+<div class="toc">
+    <h3>Table of Contents</h3>
+    <ul>
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#deployment">Deployment & Setup</a></li>
+        <li><a href="#env">Environment Configuration</a></li>
+        <li><a href="#database">Database & Storage</a></li>
+        <li><a href="#users">User Management</a></li>
+        <li><a href="#connectors">Connector Management</a></li>
+        <li><a href="#security">Security & Authentication</a></li>
+        <li><a href="#performance">Performance & Scaling</a></li>
+        <li><a href="#monitoring">Monitoring & Logging</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#maintenance">Maintenance & Updates</a></li>
+        <li><a href="#backup">Backup & Disaster Recovery</a></li>
+    </ul>
+</div>
+
+<h2 id="intro">Introduction</h2>
+
+<p>SOCint is a multi-service threat intelligence platform requiring careful deployment, monitoring, and maintenance. This manual covers setup, operations, scaling, and troubleshooting for administrators.</p>
+
+<p><strong>System Architecture:</strong></p>
+<ul>
+    <li><strong>API Server</strong> — FastAPI (port 8000), handles REST, GraphQL, SSE</li>
+    <li><strong>Worker</strong> — APScheduler-based connector scheduler, alert matcher, IoC decay</li>
+    <li><strong>Frontend</strong> — React 18 + Vite (port 3000), proxies /api to backend</li>
+    <li><strong>PostgreSQL</strong> — Relational data (users, cases, rules, compliance)</li>
+    <li><strong>OpenSearch</strong> — STIX 2.1 object store, full-text search</li>
+    <li><strong>Redis</strong> — Cache, pub/sub for real-time alerts</li>
+    <li><strong>RabbitMQ</strong> — Message queue for bulk indexing</li>
+    <li><strong>Minio</strong> — S3-compatible file storage for exports</li>
+    <li><strong>Tor SOCKS5</strong> — Proxy for dark web connectors</li>
+</ul>
+
+<p><strong>Hardware Requirements:</strong></p>
+<ul>
+    <li><strong>Minimum:</strong> 4 vCPU, 8 GB RAM, 50 GB disk, 10 Mbps bandwidth</li>
+    <li><strong>Recommended:</strong> 8+ vCPU, 16+ GB RAM, 200+ GB disk, gigabit network</li>
+</ul>
+
+<h2 id="deployment">Deployment & Setup</h2>
+
+<h3>Docker Compose (Full Stack, Recommended)</h3>
+
+<p>Deploy all services in one command:</p>
+
+<div class="step">
+    <ol>
+        <li>Clone or pull socint repository</li>
+        <li>Copy <code>.env.example</code> to <code>.env</code> and configure (see below)</li>
+        <li>On Linux, set OpenSearch max_map_count once:
+            <pre><code>sudo sysctl -w vm.max_map_count=262144</code></pre>
+        </li>
+        <li>Build and start:
+            <pre><code>docker compose up -d --build</code></pre>
+        </li>
+        <li>Verify all services running:
+            <pre><code>docker compose ps</code></pre>
+        </li>
+        <li>View logs:
+            <pre><code>docker compose logs -f</code></pre>
+        </li>
+        <li>Access frontend: <code>http://localhost:3000</code></li>
+        <li>API docs: <code>http://localhost:8000/docs</code></li>
+    </ol>
+</div>
+
+<div class="note">
+    <strong>First Login:</strong> Admin account auto-created from <code>SEED_ADMIN_PASSWORD</code> in .env. Log in with email <code>admin@socint.local</code> and that password. Change immediately.
+</div>
+
+<h3>Standalone Backend (Development)</h3>
+
+<p>Run backend without Docker for active development:</p>
+
+<pre><code>cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+export $(cat ../.env | xargs)   # Load environment
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# In another terminal, start the worker:
+python -m app.workers.main</code></pre>
+
+<h3>Frontend Only (Development)</h3>
+
+<pre><code>cd frontend
+npm install
+npm run dev    # Vite on port 3000, proxies /api to http://localhost:8000</code></pre>
+
+<h2 id="env">Environment Configuration</h2>
+
+<h3>Essential .env Variables</h3>
+
+<table>
+    <tr>
+        <th>Variable</th>
+        <th>Purpose</th>
+        <th>Example</th>
+    </tr>
+    <tr>
+        <td><code>SECRET_KEY</code></td>
+        <td>JWT signing key (64-char hex, generate with: <code>python -c "import secrets; print(secrets.token_hex(32))"</code>)</td>
+        <td><code>a3f5e9c2b1d4f7a6e8c3b0d2f4a7e9c1</code></td>
+    </tr>
+    <tr>
+        <td><code>CONNECTOR_API_KEY</code></td>
+        <td>Internal API key for connectors (separate from SECRET_KEY)</td>
+        <td><code>connector_key_12345</code></td>
+    </tr>
+    <tr>
+        <td><code>SEED_ADMIN_PASSWORD</code></td>
+        <td>Initial admin password (used once on first startup)</td>
+        <td><code>SecurePassword123!</code></td>
+    </tr>
+    <tr>
+        <td><code>DATABASE_URL</code></td>
+        <td>PostgreSQL connection string</td>
+        <td><code>postgresql+asyncpg://user:pass@postgres:5432/socint</code></td>
+    </tr>
+    <tr>
+        <td><code>OPENSEARCH_URL</code></td>
+        <td>OpenSearch cluster URL</td>
+        <td><code>http://opensearch:9200</code></td>
+    </tr>
+    <tr>
+        <td><code>REDIS_URL</code></td>
+        <td>Redis connection string</td>
+        <td><code>redis://redis:6379/0</code></td>
+    </tr>
+    <tr>
+        <td><code>RABBITMQ_URL</code></td>
+        <td>RabbitMQ broker URL</td>
+        <td><code>amqp://guest:guest@rabbitmq:5672/</code></td>
+    </tr>
+    <tr>
+        <td><code>TOR_PROXY</code></td>
+        <td>Tor SOCKS5 proxy (for dark web connectors)</td>
+        <td><code>socks5://tor:9050</code></td>
+    </tr>
+</table>
+
+<h3>Connector API Keys (Optional)</h3>
+
+<p>Set to enable enrichment and improve connector data quality:</p>
+
+<table>
+    <tr>
+        <th>Key</th>
+        <th>Source</th>
+        <th>Impact if Missing</th>
+    </tr>
+    <tr>
+        <td><code>OTX_API_KEY</code></td>
+        <td><a href="https://otx.alienvault.com">AlienVault OTX</a></td>
+        <td>OTX connector still runs but with limited data</td>
+    </tr>
+    <tr>
+        <td><code>NVD_API_KEY</code></td>
+        <td><a href="https://nvd.nist.gov">NIST NVD</a></td>
+        <td>NVD connector rate-limited to 5 req/min</td>
+    </tr>
+    <tr>
+        <td><code>VIRUSTOTAL_API_KEY</code></td>
+        <td><a href="https://www.virustotal.com">VirusTotal</a></td>
+        <td>VirusTotal enrichment disabled; community API only</td>
+    </tr>
+    <tr>
+        <td><code>ABUSEIPDB_API_KEY</code></td>
+        <td><a href="https://www.abuseipdb.com">AbuseIPDB</a></td>
+        <td>AbuseIPDB enrichment skipped</td>
+    </tr>
+    <tr>
+        <td><code>SHODAN_API_KEY</code></td>
+        <td><a href="https://www.shodan.io">Shodan</a></td>
+        <td>Shodan IOC enrichment disabled</td>
+    </tr>
+</table>
+
+<h3>Generating .env File Securely</h3>
+
+<pre><code>#!/bin/bash
+# Generate strong secrets
+SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+CONNECTOR_API_KEY=$(python -c "import secrets; print(secrets.token_urlsafe(32))")
+SEED_ADMIN_PASSWORD=$(python -c "import secrets; print(secrets.token_urlsafe(12))")
+
+cat > .env << EOF
+SECRET_KEY=$SECRET_KEY
+CONNECTOR_API_KEY=$CONNECTOR_API_KEY
+SEED_ADMIN_PASSWORD=$SEED_ADMIN_PASSWORD
+DATABASE_URL=postgresql+asyncpg://user:pass@postgres:5432/socint
+OPENSEARCH_URL=http://opensearch:9200
+REDIS_URL=redis://redis:6379/0
+RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+TOR_PROXY=socks5://tor:9050
+OTX_API_KEY=
+NVD_API_KEY=
+VIRUSTOTAL_API_KEY=
+EOF
+
+chmod 600 .env</code></pre>
+
+<h2 id="database">Database & Storage</h2>
+
+<h3>PostgreSQL Setup</h3>
+
+<p>PostgreSQL stores metadata: users, cases, rules, compliance tags, audit logs.</p>
+
+<div class="step">
+    <strong>Initial Schema Setup:</strong>
+    <ol>
+        <li>Database migrations run automatically on FastAPI startup via Alembic</li>
+        <li>First run creates all tables</li>
+        <li>To verify:
+            <pre><code>psql -h localhost -U socint -d socint -c "\dt"</code></pre>
+        </li>
+    </ol>
+</div>
+
+<p><strong>Key Tables:</strong></p>
+<ul>
+    <li><code>users</code> — User accounts, roles, organizations</li>
+    <li><code>cases</code> — Investigation cases with metadata</li>
+    <li><code>case_tasks</code> — Tasks within cases</li>
+    <li><code>case_comments</code> — Case discussion/notes</li>
+    <li><code>case_observables</code> — Artifacts in cases (IOCs, etc.)</li>
+    <li><code>detection_rules</code> — Sigma, YARA, custom rules</li>
+    <li><code>alert_rules</code> — Rules for triggering alerts on new IOCs</li>
+    <li><code>compliance_frameworks</code> — NIST 800-53, CSF tags</li>
+    <li><code>api_keys</code> — User API keys (hashed)</li>
+</ul>
+
+<h3>PostgreSQL Backup & Restore</h3>
+
+<div class="step">
+    <strong>Daily Backup:</strong>
+    <pre><code>docker compose exec -T postgres pg_dump -U socint -d socint > socint_backup_$(date +%Y%m%d).sql</code></pre>
+</div>
+
+<div class="step">
+    <strong>Restore from Backup:</strong>
+    <pre><code>docker compose exec -T postgres psql -U socint -d socint < socint_backup_20240115.sql</code></pre>
+</div>
+
+<p><strong>Or use automated backups:</strong> Set up pg_dump in cron or use AWS RDS automated snapshots.</p>
+
+<h3>OpenSearch Setup</h3>
+
+<p>OpenSearch stores STIX 2.1 objects (IOCs, malware, threat actors, etc.) with full-text search.</p>
+
+<div class="step">
+    <strong>Index Management:</strong>
+    <ol>
+        <li>Indices created automatically on startup</li>
+        <li>Index policy: <code>stix-objects-*</code> (time-based rollover daily)</li>
+        <li>View indices:
+            <pre><code>curl -s http://localhost:9200/_cat/indices | grep stix</code></pre>
+        </li>
+        <li>Check health:
+            <pre><code>curl -s http://localhost:9200/_cluster/health</code></pre>
+        </li>
+    </ol>
+</div>
+
+<p><strong>Tuning for Large Datasets:</strong></p>
+<ul>
+    <li><strong>Shard count:</strong> Set to number of data nodes (or 1 for single node)</li>
+    <li><strong>Replica count:</strong> Set to 1 for redundancy, 0 for dev</li>
+    <li><strong>Refresh interval:</strong> Increase to 30s for better indexing throughput on bulk imports</li>
+</ul>
+
+<pre><code>curl -X PUT http://localhost:9200/stix-objects-2024-01 -H "Content-Type: application/json" -d '{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1,
+    "refresh_interval": "30s"
+  }
+}'</code></pre>
+
+<h3>OpenSearch Backup & Restore</h3>
+
+<div class="step">
+    <strong>Create Snapshot Repository:</strong>
+    <pre><code>curl -X PUT http://localhost:9200/_snapshot/backup -H "Content-Type: application/json" -d '{
+  "type": "fs",
+  "settings": { "location": "/snapshots" }
+}'</code></pre>
+</div>
+
+<div class="step">
+    <strong>Snapshot All Indices:</strong>
+    <pre><code>curl -X PUT http://localhost:9200/_snapshot/backup/snapshot_$(date +%Y%m%d)</code></pre>
+</div>
+
+<div class="step">
+    <strong>Restore Snapshot:</strong>
+    <pre><code>curl -X POST http://localhost:9200/_snapshot/backup/snapshot_20240115/_restore</code></pre>
+</div>
+
+<h3>Data Retention Policies</h3>
+
+<p>Older IOCs consume storage. Implement retention:</p>
+
+<table>
+    <tr>
+        <th>Data Type</th>
+        <th>Retention</th>
+        <th>Rationale</th>
+    </tr>
+    <tr>
+        <td>Fresh IOCs (&lt;30 days)</td>
+        <td>Keep all</td>
+        <td>High relevance</td>
+    </tr>
+    <tr>
+        <td>Aged IOCs (30–90 days)</td>
+        <td>Keep with reduced confidence</td>
+        <td>Decay score applied daily</td>
+    </tr>
+    <tr>
+        <td>Very old IOCs (&gt;90 days)</td>
+        <td>Archive or delete if no sightings</td>
+        <td>Low relevance, save storage</td>
+    </tr>
+    <tr>
+        <td>Case closed &gt;1 year</td>
+        <td>Archive to cold storage</td>
+        <td>Compliance (keep 7 years if regulated)</td>
+    </tr>
+</table>
+
+<h2 id="users">User Management</h2>
+
+<h3>User Roles & Permissions</h3>
+
+<table>
+    <tr>
+        <th>Role</th>
+        <th>Permissions</th>
+        <th>Use Case</th>
+    </tr>
+    <tr>
+        <td><strong>Admin</strong></td>
+        <td>All. Can manage users, connectors, rules, settings</td>
+        <td>Platform operators</td>
+    </tr>
+    <tr>
+        <td><strong>Analyst</strong></td>
+        <td>Read/write intel, cases, rules (local). Cannot manage users or global settings</td>
+        <td>Threat intelligence team</td>
+    </tr>
+    <tr>
+        <td><strong>Reader</strong></td>
+        <td>Read-only. Cannot create/modify. Can view cases and export</td>
+        <td>Management review, audit</td>
+    </tr>
+</table>
+
+<h3>Creating Users</h3>
+
+<p><strong>Via UI (Admin):</strong></p>
+<ol>
+    <li>Click <strong>"Settings"</strong> (admin only) → <strong>"Users"</strong></li>
+    <li>Click <strong>"+ Invite User"</strong></li>
+    <li>Enter email, username, select role</li>
+    <li>System sends signup link (user completes registration)</li>
+</ol>
+
+<p><strong>Via API:</strong></p>
+<pre><code>curl -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "analyst@example.com",
+    "username": "alice",
+    "password": "secure_password",
+    "organization_name": "ACME Corp"
+  }'</code></pre>
+
+<h3>Disabling Users</h3>
+
+<p>Deactivate without deletion (preserves audit trail):</p>
+
+<ol>
+    <li>Settings → Users → click user → toggle <strong>"Active"</strong></li>
+    <li>User cannot login; cases/history remain</li>
+</ol>
+
+<h3>Organizations & Team Isolation</h3>
+
+<p>If multi-tenant, assign users to organizations:</p>
+
+<ol>
+    <li>Create organization in admin panel</li>
+    <li>Invite users to organization</li>
+    <li>Users only see intel/cases within their org (unless shared)</li>
+    <li><strong>Note:</strong> This is a roadmap feature; current version is single-org</li>
+</ol>
+
+<h2 id="connectors">Connector Management</h2>
+
+<h3>26 Built-in Connectors</h3>
+
+<p>SOCint ships with 26 threat feed connectors. View status and manage from Admin → Connectors:</p>
+
+<table>
+    <tr>
+        <th>Connector</th>
+        <th>Feed</th>
+        <th>Default Schedule</th>
+        <th>Requires API Key?</th>
+    </tr>
+    <tr>
+        <td>OTX</td>
+        <td>AlienVault Open Threat Exchange</td>
+        <td>Every 6 hours</td>
+        <td>No (enhanced with key)</td>
+    </tr>
+    <tr>
+        <td>MISP</td>
+        <td>MISP community or private instance</td>
+        <td>Every 12 hours</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>CISA KEV</td>
+        <td>CISA Known Exploited Vulnerabilities</td>
+        <td>Daily</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>NVD</td>
+        <td>NIST National Vulnerability Database</td>
+        <td>Daily</td>
+        <td>No (enhanced with key)</td>
+    </tr>
+    <tr>
+        <td>VirusTotal</td>
+        <td>Malware & URL sandbox results</td>
+        <td>Every 6 hours</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>Ransomware.live</td>
+        <td>Ransomware gang leak sites & victims</td>
+        <td>Hourly</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Shodan</td>
+        <td>Internet-wide device scanner</td>
+        <td>Daily</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>Abuse.ch URLhaus</td>
+        <td>Malware distribution URLs</td>
+        <td>Every 6 hours</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Abuse.ch SSLBL</td>
+        <td>Malicious SSL certificates</td>
+        <td>Daily</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>OSINT Framework</td>
+        <td>Community OSINT feeds</td>
+        <td>Weekly</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td colspan="4" style="background: #f9f9f9;"><em>+ 16 more (dark web forums, paste sites, social media monitoring, etc.)</em></td>
+    </tr>
+</table>
+
+<p><strong>Total: 26 active connectors covering IOCs, vulnerabilities, threat actors, malware families, attack techniques.</strong></p>
+
+<h3>Enabling/Disabling Connectors</h3>
+
+<p>Via Admin UI:</p>
+<ol>
+    <li>Settings → <strong>"Connectors"</strong></li>
+    <li>Find connector in list</li>
+    <li>Toggle <strong>"Enabled"</strong> checkbox</li>
+    <li>Adjust <strong>"Schedule"</strong> (cron format, e.g., <code>0 */6 * * *</code> = every 6 hours)</li>
+    <li>Set <strong>"Source Reliability"</strong> (0–100, how much to trust this feed)</li>
+    <li>Click <strong>"Save"</strong></li>
+</ol>
+
+<h3>Monitoring Connector Health</h3>
+
+<p>Each connector tracks last run, success/failure, and error logs:</p>
+
+<pre><code>curl http://localhost:8000/api/connectors/status \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Response:
+[
+  {
+    "name": "OTX",
+    "enabled": true,
+    "last_run": "2024-01-15T10:30:00Z",
+    "status": "success",
+    "items_ingested": 1234,
+    "errors": null
+  },
+  {
+    "name": "CISA_KEV",
+    "enabled": true,
+    "last_run": "2024-01-14T09:00:00Z",
+    "status": "error",
+    "items_ingested": 0,
+    "errors": "Connection timeout"
+  }
+]</code></pre>
+
+<p><strong>Troubleshooting Failing Connectors:</strong></p>
+<ul>
+    <li>Check worker logs: <code>docker compose logs worker</code></li>
+    <li>Verify API keys configured (if required)</li>
+    <li>Check network connectivity to feed (test with curl)</li>
+    <li>Disable temporarily if feed is offline; re-enable when recovered</li>
+</ul>
+
+<h3>Custom Connectors</h3>
+
+<p>Build your own connectors extending BaseConnector:</p>
+
+<pre><code>from app.connectors.sdk.base import BaseConnector, ConnectorConfig
+
+class MySourceConnector(BaseConnector):
+    def __init__(self):
+        super().__init__(ConnectorConfig(
+            name="my-source",
+            display_name="My Threat Feed",
+            connector_type="import_external",
+            schedule="0 */12 * * *",  # Every 12 hours
+            source_reliability=80,
+            default_tlp="TLP:AMBER"
+        ))
+
+    async def run(self):
+        # Fetch data from your API
+        data = await self._fetch_feed()
+
+        # Convert to STIX objects
+        stix_objects = []
+        for item in data:
+            stix_obj = {
+                "type": "ipv4-addr" if self._is_ip(item) else "domain-name",
+                "value": item,
+                "x_clawint_source": self.config.name,
+                "tlp": self.config.default_tlp
+            }
+            stix_objects.append(stix_obj)
+
+        # Push to platform
+        await self.push_to_platform(stix_objects)
+
+    async def _fetch_feed(self):
+        # Your fetch logic
+        pass
+
+    def _is_ip(self, value):
+        # Your validation
+        pass</code></pre>
+
+<p>Register in <code>backend/app/workers/scheduler.py</code> then deploy.</p>
+
+<h2 id="security">Security & Authentication</h2>
+
+<h3>JWT Token Management</h3>
+
+<p>SOCint uses JWT (JSON Web Tokens) for stateless authentication:</p>
+
+<ul>
+    <li><strong>Token Lifetime:</strong> 24 hours by default (configurable in config.py)</li>
+    <li><strong>Refresh Tokens:</strong> Support for sliding session (token renewed on each request)</li>
+    <li><strong>Signing Algorithm:</strong> HS256 (HMAC with SHA-256)</li>
+    <li><strong>Rotation:</strong> Change SECRET_KEY in .env to invalidate all tokens (forces re-login)</li>
+</ul>
+
+<h3>API Key Security</h3>
+
+<p>API keys are hashed and stored securely:</p>
+
+<ul>
+    <li><strong>Generation:</strong> 32 random bytes, base64-encoded</li>
+    <li><strong>Storage:</strong> Only hash stored in DB, raw key shown once at creation</li>
+    <li><strong>Rotation:</strong> Users can revoke and create new keys anytime</li>
+    <li><strong>Scoping:</strong> Keys inherit user's permissions; no separate scopes yet (roadmap)</li>
+</ul>
+
+<p><strong>Revoking Compromised Keys:</strong></p>
+<pre><code>curl -X DELETE http://localhost:8000/api/auth/api-keys/{key_id} \
+  -H "Authorization: Bearer USER_TOKEN"</code></pre>
+
+<h3>Password Policy</h3>
+
+<p>Implement strong password requirements:</p>
+
+<ul>
+    <li><strong>Minimum Length:</strong> 12 characters</li>
+    <li><strong>Complexity:</strong> Uppercase, lowercase, number, special character</li>
+    <li><strong>Expiration:</strong> 90 days (optional, can disable)</li>
+    <li><strong>History:</strong> Don't allow reuse of last 5 passwords</li>
+</ul>
+
+<p>Enforce in config.py; bcrypt hashing with salt for storage.</p>
+
+<h3>TLS/SSL Setup</h3>
+
+<p>For production, require HTTPS:</p>
+
+<pre><code>version: '3'
+services:
+  api:
+    environment:
+      - HTTPS_ENABLED=true
+      - CERT_PATH=/certs/server.crt
+      - KEY_PATH=/certs/server.key
+    volumes:
+      - /path/to/certs:/certs:ro
+    ports:
+      - "8443:8443"  # HTTPS port
+
+  frontend:
+    environment:
+      - API_URL=https://api:8443/api
+    ports:
+      - "443:443"</code></pre>
+
+<p><strong>Or use reverse proxy (nginx/Caddy) for TLS termination.</strong></p>
+
+<h3>Rate Limiting & DDoS Protection</h3>
+
+<p>Enable rate limiting on sensitive endpoints:</p>
+
+<ul>
+    <li><strong>Login:</strong> 5 attempts per minute per IP</li>
+    <li><strong>API calls:</strong> 1000 requests/min per user (default)</li>
+    <li><strong>File uploads:</strong> 100 MB max file size</li>
+</ul>
+
+<p>Configure in config.py or behind nginx reverse proxy.</p>
+
+<h2 id="performance">Performance & Scaling</h2>
+
+<h3>PostgreSQL Optimization</h3>
+
+<p>For large case/rule datasets, tune PostgreSQL:</p>
+
+<table>
+    <tr>
+        <th>Parameter</th>
+        <th>Small (&lt;100K records)</th>
+        <th>Large (&gt;1M records)</th>
+    </tr>
+    <tr>
+        <td><code>shared_buffers</code></td>
+        <td>256 MB</td>
+        <td>4–8 GB (25% of RAM)</td>
+    </tr>
+    <tr>
+        <td><code>effective_cache_size</code></td>
+        <td>1 GB</td>
+        <td>16 GB (50% of RAM)</td>
+    </tr>
+    <tr>
+        <td><code>work_mem</code></td>
+        <td>4 MB</td>
+        <td>64–256 MB</td>
+    </tr>
+    <tr>
+        <td><code>maintenance_work_mem</code></td>
+        <td>64 MB</td>
+        <td>1–2 GB</td>
+    </tr>
+    <tr>
+        <td><code>wal_buffers</code></td>
+        <td>16 MB</td>
+        <td>64–256 MB</td>
+    </tr>
+</table>
+
+<p>Apply in docker-compose.yml:</p>
+
+<pre><code>postgres:
+  image: postgres:15
+  command:
+    - "-c"
+    - "shared_buffers=4GB"
+    - "-c"
+    - "effective_cache_size=16GB"
+    - "-c"
+    - "work_mem=128MB"</code></pre>
+
+<h3>OpenSearch Tuning</h3>
+
+<p>For billions of STIX objects:</p>
+
+<ul>
+    <li><strong>Heap Size:</strong> Set to 50% of available RAM (max 31 GB), e.g., <code>-Xmx16g -Xms16g</code></li>
+    <li><strong>Shard Count:</strong> 1 shard per 40 GB of data (~25 million STIX objects)</li>
+    <li><strong>Refresh Interval:</strong> Increase from 1s to 30s for bulk indexing</li>
+    <li><strong>Merge Settings:</strong> Tune segment merging to reduce CPU during bulk ops</li>
+</ul>
+
+<pre><code>opensearch:
+  image: opensearchproject/opensearch:2.0.0
+  environment:
+    - discovery.type=single-node
+    - OPENSEARCH_JAVA_OPTS=-Xmx16g -Xms16g
+    - plugins.security.disabled=true  # Use external auth instead</code></pre>
+
+<h3>Redis Cache Optimization</h3>
+
+<p>Redis caches API responses, enrichment results, and session data:</p>
+
+<ul>
+    <li><strong>Memory Policy:</strong> Set <code>maxmemory-policy=allkeys-lru</code> (evict least-used keys when full)</li>
+    <li><strong>Persistence:</strong> Enable RDB snapshots for recovery: <code>save 300 10</code> (snapshot if 10 writes in 300s)</li>
+    <li><strong>Monitoring:</strong> Watch memory usage; scale up if hitting limit</li>
+</ul>
+
+<p>Configure in docker-compose.yml:</p>
+
+<pre><code>redis:
+  command: redis-server --maxmemory 4gb --maxmemory-policy allkeys-lru</code></pre>
+
+<h3>Horizontal Scaling (Multiple Workers)</h3>
+
+<p>Run multiple worker instances for parallel connector execution:</p>
+
+<pre><code>version: '3'
+services:
+  worker-1:
+    build: ./backend
+    command: python -m app.workers.main
+    environment:
+      - WORKER_ID=1
+    depends_on:
+      - postgres
+      - opensearch
+      - redis
+      - rabbitmq
+
+  worker-2:
+    build: ./backend
+    command: python -m app.workers.main
+    environment:
+      - WORKER_ID=2
+    depends_on:
+      - postgres
+      - opensearch
+      - redis
+      - rabbitmq</code></pre>
+
+<p>Each worker picks up scheduled jobs from RabbitMQ independently.</p>
+
+<h2 id="monitoring">Monitoring & Logging</h2>
+
+<h3>Structlog Configuration</h3>
+
+<p>SOCint uses structlog for structured, parseable logs:</p>
+
+<pre><code>curl http://localhost:8000/api/debug/logs?level=INFO&limit=100
+
+# Returns JSON:
+[
+  {
+    "timestamp": "2024-01-15T10:30:00.123Z",
+    "level": "INFO",
+    "event": "connector_started",
+    "connector": "OTX",
+    "duration_seconds": 45.2
+  },
+  {
+    "timestamp": "2024-01-15T10:31:00.456Z",
+    "level": "WARNING",
+    "event": "enrichment_api_timeout",
+    "api": "VirusTotal",
+    "retry_count": 2
+  }
+]</code></pre>
+
+<h3>System Monitoring</h3>
+
+<p>Monitor health via metrics endpoint:</p>
+
+<pre><code>curl http://localhost:8000/health
+
+# Response:
+{
+  "status": "healthy",
+  "services": {
+    "postgres": "connected",
+    "opensearch": "connected",
+    "redis": "connected",
+    "rabbitmq": "connected"
+  },
+  "uptime_seconds": 864000,
+  "requests_per_second": 42.3,
+  "active_connections": 128
+}</code></pre>
+
+<h3>Prometheus Metrics (Optional)</h3>
+
+<p>Export metrics for Prometheus scraping (enable in config.py):</p>
+
+<pre><code>curl http://localhost:8000/metrics
+
+# Prometheus format:
+socint_api_requests_total{method="GET",endpoint="/intel/objects",status="200"} 15234
+socint_api_request_duration_seconds{endpoint="/intel/objects"} 0.042
+socint_opensearch_query_latency_ms{query_type="search"} 125.6
+socint_connector_ingestion_rate{connector="OTX"} 450.2</code></pre>
+
+<h3>Alert Rules (Example)</h3>
+
+<p>Set up alerts for operational issues:</p>
+
+<ul>
+    <li><strong>High Error Rate:</strong> &gt;1% of API requests failing</li>
+    <li><strong>Connector Failure:</strong> 3+ consecutive failed runs</li>
+    <li><strong>Database Lag:</strong> Replication lag &gt;30 seconds</li>
+    <li><strong>Disk Usage:</strong> &gt;80% capacity</li>
+    <li><strong>OpenSearch Heap:</strong> &gt;85% utilization</li>
+</ul>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h3>API Won't Start</h3>
+
+<p><strong>Symptom:</strong> <code>docker compose logs api</code> shows error</p>
+
+<p><strong>Common Causes:</strong></p>
+<ul>
+    <li><strong>Database unreachable:</strong> Check DATABASE_URL, verify postgres running</li>
+    <li><strong>OpenSearch unreachable:</strong> Verify opensearch service, check firewall</li>
+    <li><strong>Missing .env:</strong> Copy .env.example → .env and configure</li>
+    <li><strong>Port already in use:</strong> Kill process: <code>lsof -i :8000</code></li>
+</ul>
+
+<p><strong>Solution:</strong></p>
+<pre><code>docker compose down
+docker compose up --build</code></pre>
+
+<h3>Connectors Not Running</h3>
+
+<p><strong>Symptom:</strong> No new IOCs ingested</p>
+
+<p><strong>Debug Steps:</strong></p>
+<ol>
+    <li>Check worker is running: <code>docker compose ps | grep worker</code></li>
+    <li>View worker logs: <code>docker compose logs worker | grep -i error</code></li>
+    <li>Check if connector enabled: Admin → Connectors → toggle "Enabled"</li>
+    <li>Verify schedule: <code>0 */6 * * *</code> means every 6 hours (adjust if needed)</li>
+    <li>Run connector manually:
+        <pre><code>docker compose exec worker python -c "
+from app.connectors.builtin.otx import OTXConnector
+import asyncio
+asyncio.run(OTXConnector().run())
+"</code></pre>
+    </li>
+</ol>
+
+<h3>Search Returns No Results</h3>
+
+<p><strong>Symptom:</strong> Intel searches empty despite connectors running</p>
+
+<p><strong>Debug Steps:</strong></p>
+<ol>
+    <li>Check OpenSearch indices exist:
+        <pre><code>curl -s http://localhost:9200/_cat/indices | grep stix</code></pre>
+    </li>
+    <li>If no indices, connector ingestion failed. Check worker logs.</li>
+    <li>Count docs in index:
+        <pre><code>curl -s http://localhost:9200/stix-objects-*/_count</code></pre>
+    </li>
+    <li>If 0 documents, manually trigger connector (see above)</li>
+    <li>Verify search filter TLP level (may be hiding results with TLP:RED if user lacks access)</li>
+</ol>
+
+<h3>Database Connection Errors</h3>
+
+<p><strong>Symptom:</strong> <code>psycopg2.OperationalError: server closed connection unexpectedly</code></p>
+
+<p><strong>Solution:</strong></p>
+<ol>
+    <li>Restart postgres: <code>docker compose restart postgres</code></li>
+    <li>Check disk space: <code>df -h</code> (postgres may be full)</li>
+    <li>Check PostgreSQL logs: <code>docker compose logs postgres</code></li>
+    <li>Clear old connections:
+        <pre><code>docker compose exec postgres psql -U socint -d socint -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND query_start < now() - INTERVAL '1 hour';"</code></pre>
+    </li>
+</ol>
+
+<h3>OpenSearch Out of Memory</h3>
+
+<p><strong>Symptom:</strong> <code>java.lang.OutOfMemoryError</code> in OpenSearch logs</p>
+
+<p><strong>Solution:</strong></p>
+<ol>
+    <li>Increase heap in docker-compose.yml: <code>OPENSEARCH_JAVA_OPTS=-Xmx32g -Xms32g</code></li>
+    <li>Delete old indices if not needed:
+        <pre><code>curl -X DELETE http://localhost:9200/stix-objects-2023-*</code></pre>
+    </li>
+    <li>Enable index lifecycle management (ILM) to auto-archive old indices</li>
+    <li>Increase system memory or scale horizontally (add nodes)</li>
+</ol>
+
+<h3>Port Conflicts</h3>
+
+<p><strong>Symptom:</strong> <code>Bind for 0.0.0.0:8000 failed: port is already allocated</code></p>
+
+<p><strong>Solution:</strong></p>
+<pre><code># Find and kill process using port
+lsof -i :8000
+kill -9 <PID>
+
+# Or change port in docker-compose.yml
+ports:
+  - "8001:8000"  # Use 8001 instead</code></pre>
+
+<h2 id="maintenance">Maintenance & Updates</h2>
+
+<h3>Software Updates</h3>
+
+<p><strong>Before Updating:</strong></p>
+<ol>
+    <li>Backup PostgreSQL and OpenSearch (see Backup section)</li>
+    <li>Test in staging environment</li>
+    <li>Schedule maintenance window (notify users)</li>
+</ol>
+
+<p><strong>Update Process:</strong></p>
+<pre><code>cd /path/to/socint
+
+# Pull latest code
+git pull origin main
+
+# Update dependencies
+docker compose build --no-cache
+
+# Stop old services, start new ones
+docker compose down
+docker compose up -d
+
+# Verify health
+curl http://localhost:8000/health</code></pre>
+
+<h3>Configuration Changes</h3>
+
+<p>To update .env variables without full rebuild:</p>
+
+<ol>
+    <li>Edit <code>.env</code> file</li>
+    <li>Restart affected services:
+        <pre><code>docker compose restart api worker</code></pre>
+    </li>
+    <li>Verify: <code>docker compose logs api | head -20</code></li>
+</ol>
+
+<h3>Index Optimization</h3>
+
+<p>Periodically optimize OpenSearch indices to improve performance:</p>
+
+<pre><code># Force merge to reduce segment count (impacts read performance)
+curl -X POST http://localhost:9200/stix-objects-*/_forcemerge?max_num_segments=1
+
+# Delete old indices (if using time-based rollover)
+curl -X DELETE http://localhost:9200/stix-objects-2023-*</code></pre>
+
+<h3>Database Cleanup</h3>
+
+<p>Remove deleted cases and expired API keys:</p>
+
+<pre><code>docker compose exec postgres psql -U socint -d socint << EOF
+-- Delete cases closed > 2 years ago
+DELETE FROM cases WHERE status = 'archived' AND closed_at < now() - INTERVAL '2 years';
+
+-- Delete inactive API keys > 6 months old
+DELETE FROM api_keys WHERE is_active = false AND updated_at < now() - INTERVAL '6 months';
+
+-- Vacuum to reclaim space
+VACUUM ANALYZE;
+EOF</code></pre>
+
+<h2 id="backup">Backup & Disaster Recovery</h2>
+
+<h3>Backup Strategy (3–2–1 Rule)</h3>
+
+<p>Keep 3 copies of critical data, 2 different media, 1 offsite:</p>
+
+<table>
+    <tr>
+        <th>Copy</th>
+        <th>Location</th>
+        <th>Frequency</th>
+        <th>Retention</th>
+    </tr>
+    <tr>
+        <td>Production DB</td>
+        <td>Primary server</td>
+        <td>Continuous (WAL archiving)</td>
+        <td>Current</td>
+    </tr>
+    <tr>
+        <td>Daily backup</td>
+        <td>Local NAS/attached storage</td>
+        <td>Daily (11 PM UTC)</td>
+        <td>30 days</td>
+    </tr>
+    <tr>
+        <td>Weekly backup</td>
+        <td>Remote object storage (AWS S3, MinIO)</td>
+        <td>Weekly (Sunday)</td>
+        <td>1 year</td>
+    </tr>
+</table>
+
+<h3>Automated Daily Backup Script</h3>
+
+<pre><code>#!/bin/bash
+# Save as /opt/socint/backup.sh
+
+BACKUP_DIR="/mnt/backups/socint"
+REMOTE_S3="s3://backup-bucket/socint"
+DATE=$(date +%Y%m%d)
+
+# Create directory
+mkdir -p $BACKUP_DIR/$DATE
+
+# Backup PostgreSQL
+docker compose exec -T postgres pg_dump -U socint -d socint | gzip > $BACKUP_DIR/$DATE/postgres.sql.gz
+
+# Backup OpenSearch (snapshot)
+curl -X PUT http://localhost:9200/_snapshot/backup/snapshot_$DATE
+
+# Upload to S3
+aws s3 cp $BACKUP_DIR/$DATE s3://backup-bucket/socint/$DATE --recursive
+
+# Cleanup old local backups (keep 30 days)
+find $BACKUP_DIR -type d -mtime +30 -exec rm -rf {} \;
+
+echo "Backup completed: $DATE"</code></pre>
+
+<p><strong>Add to crontab:</strong></p>
+<pre><code>0 23 * * * /opt/socint/backup.sh >> /var/log/socint-backup.log 2>&1</code></pre>
+
+<h3>Recovery Procedures</h3>
+
+<p><strong>Recover from PostgreSQL backup:</strong></p>
+<pre><code># Stop services
+docker compose down
+
+# Restore database
+docker compose up -d postgres
+sleep 30  # Wait for postgres to be ready
+docker compose exec -T postgres psql -U socint -d postgres < socint_backup_20240115.sql
+
+# Restart all services
+docker compose up -d</code></pre>
+
+<p><strong>Recover from OpenSearch snapshot:</strong></p>
+<pre><code># List available snapshots
+curl http://localhost:9200/_snapshot/backup/_all
+
+# Restore specific snapshot
+curl -X POST http://localhost:9200/_snapshot/backup/snapshot_20240115/_restore -H "Content-Type: application/json" -d '{
+  "indices": "stix-objects-*"
+}'</code></pre>
+
+<h3>RTO & RPO Targets</h3>
+
+<table>
+    <tr>
+        <th>Metric</th>
+        <th>Target</th>
+        <th>Strategy</th>
+    </tr>
+    <tr>
+        <td><strong>RTO</strong> (Recovery Time Objective)</td>
+        <td>&lt;1 hour</td>
+        <td>Docker Compose re-deployment + restore from latest daily backup</td>
+    </tr>
+    <tr>
+        <td><strong>RPO</strong> (Recovery Point Objective)</td>
+        <td>&lt;24 hours</td>
+        <td>Daily backups at 11 PM UTC; WAL archiving for point-in-time recovery</td>
+    </tr>
+</table>
+
+<hr style="margin: 40px 0; border: none; border-top: 2px solid #c41e3a;">
+
+<p style="text-align: center; color: #666; margin-top: 40px;">
+    <strong>Document Version:</strong> 1.0 | <strong>Last Updated:</strong> January 2024 | <strong>Contact:</strong> admin@socint.local
+</p>
+
+</div>
+</body>
+</html>

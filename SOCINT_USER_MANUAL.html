@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCint User Manual</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #1a5490; border-bottom: 3px solid #1a5490; padding-bottom: 15px; margin-bottom: 30px; font-size: 2.5em; }
+        h2 { color: #2a6fa0; margin-top: 40px; margin-bottom: 20px; padding-left: 10px; border-left: 4px solid #2a6fa0; }
+        h3 { color: #3a7fb0; margin-top: 25px; margin-bottom: 15px; }
+        h4 { color: #4a8fb0; margin-top: 15px; margin-bottom: 10px; }
+        p { margin-bottom: 15px; text-align: justify; }
+        ul, ol { margin-left: 30px; margin-bottom: 15px; }
+        li { margin-bottom: 10px; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; color: #d63384; }
+        pre { background: #f5f5f5; border: 1px solid #ddd; border-radius: 5px; padding: 15px; overflow-x: auto; margin-bottom: 15px; }
+        pre code { color: inherit; padding: 0; background: none; }
+        .note { background: #e8f4f8; border-left: 4px solid #2a6fa0; padding: 15px; margin: 20px 0; border-radius: 3px; }
+        .warning { background: #fff3cd; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; border-radius: 3px; }
+        .success { background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; border-radius: 3px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f0f0f0; font-weight: bold; color: #1a5490; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .toc { background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; padding: 20px; margin: 20px 0; }
+        .toc h3 { margin-top: 0; }
+        .toc ul { margin: 10px 0; }
+        .toc a { color: #1a5490; text-decoration: none; }
+        .toc a:hover { text-decoration: underline; }
+        .step { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #4a8fb0; }
+        .section-break { page-break-before: always; border-top: 3px solid #1a5490; padding-top: 40px; margin-top: 40px; }
+        .icon { margin-right: 8px; }
+        kbd { background: #333; color: white; padding: 3px 8px; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+<h1>🔍 SOCint User Manual</h1>
+<p style="font-size: 1.1em; color: #666; margin-bottom: 30px;">
+    <strong>Version 1.0</strong> | Comprehensive guide for threat intelligence analysts and security professionals
+</p>
+
+<div class="toc">
+    <h3>Table of Contents</h3>
+    <ul>
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#getting-started">Getting Started</a></li>
+        <li><a href="#dashboard">Dashboard Overview</a></li>
+        <li><a href="#intel">Working with Intelligence</a></li>
+        <li><a href="#hunting">Threat Hunting</a></li>
+        <li><a href="#cases">Case Management</a></li>
+        <li><a href="#rules">Detection Rules</a></li>
+        <li><a href="#darkweb">Dark Web Monitoring</a></li>
+        <li><a href="#enrichment">Enrichment</a></li>
+        <li><a href="#compliance">Compliance & Reporting</a></li>
+        <li><a href="#api">API & Integration</a></li>
+        <li><a href="#faq">FAQ & Troubleshooting</a></li>
+    </ul>
+</div>
+
+<h2 id="intro">Introduction</h2>
+<p>SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1 standard. It ingests 26+ external threat feeds, stores intelligence as standardized objects, enriches data with external APIs, and provides analysts with tools for threat hunting, case management, detection rules, and compliance reporting.</p>
+
+<p><strong>Key Features:</strong></p>
+<ul>
+    <li><strong>26 Built-in Connectors</strong> — OTX, MISP, CISA KEV, NVD, Ransomware.live, dark web feeds, and more</li>
+    <li><strong>STIX 2.1 Standards</strong> — All threat intel normalized to STIX 2.1 format with custom extensions</li>
+    <li><strong>Threat Hunting</strong> — Pivot searches correlating IOCs, threat actors, malware families, and detection rules</li>
+    <li><strong>Case Management</strong> — Track investigations with cases, observables, tasks, and team collaboration</li>
+    <li><strong>Detection Rules</strong> — Create and manage Sigma rules, YARA rules, and custom detection logic</li>
+    <li><strong>Dark Web Monitoring</strong> — Automated scanning of dark web markets and forums for mentions</li>
+    <li><strong>Enrichment</strong> — Enrich IOCs with GreyNoise, VirusTotal, OTX, AbuseIPDB data</li>
+    <li><strong>Compliance</strong> — NIST 800-53 mapping, CSF tags, and audit trails for regulatory requirements</li>
+    <li><strong>Real-time Alerts</strong> — SSE stream for live alert notifications on new IOCs and matches</li>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<h3>1. Login & Registration</h3>
+
+<div class="step">
+    <strong>First-time user:</strong>
+    <ol>
+        <li>Navigate to SOCint web interface (default: <code>http://localhost:3000</code>)</li>
+        <li>Click <strong>"Register"</strong> on the login page</li>
+        <li>Enter email, username, password, and optional organization name</li>
+        <li>Click <strong>"Create Account"</strong></li>
+        <li>You'll be logged in and redirected to the dashboard</li>
+    </ol>
+</div>
+
+<div class="step">
+    <strong>Existing user:</strong>
+    <ol>
+        <li>Enter email and password on login page</li>
+        <li>Click <strong>"Login"</strong></li>
+        <li>You're authenticated with a JWT token valid for 24 hours</li>
+    </ol>
+</div>
+
+<div class="note">
+    <strong>Admin note:</strong> The first user to register becomes an admin automatically. Subsequent users are analysts by default. Admins can change roles via user management.
+</div>
+
+<h3>2. API Keys</h3>
+<p>For programmatic access, create API keys:</p>
+<ol>
+    <li>Click your profile icon (top right) → <strong>"Settings"</strong></li>
+    <li>Select <strong>"API Keys"</strong></li>
+    <li>Click <strong>"Create New Key"</strong> and give it a label (e.g., "integration-bot")</li>
+    <li>Copy the key immediately — <strong>it won't be shown again</strong></li>
+    <li>Use it in API requests: <code>Authorization: Bearer YOUR_API_KEY</code></li>
+</ol>
+
+<div class="warning">
+    <strong>Security:</strong> Treat API keys like passwords. Never commit them to version control. Rotate regularly. Revoke keys you no longer use.
+</div>
+
+<h2 id="dashboard">Dashboard Overview</h2>
+
+<p>The SOCint dashboard provides a unified view of threat intelligence activity:</p>
+
+<table>
+    <tr>
+        <th>Component</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td><strong>Search Bar</strong></td>
+        <td>Global search across all STIX objects (IOCs, malware, actors, techniques)</td>
+    </tr>
+    <tr>
+        <td><strong>Recent Intel</strong></td>
+        <td>Last 10 indicators ingested from connectors</td>
+    </tr>
+    <tr>
+        <td><strong>Active Cases</strong></td>
+        <td>Quick links to open investigations</td>
+    </tr>
+    <tr>
+        <td><strong>Top Threat Actors</strong></td>
+        <td>Most sighted threat actor groups</td>
+    </tr>
+    <tr>
+        <td><strong>Alert Feed</strong></td>
+        <td>Real-time stream of new detections and rule matches</td>
+    </tr>
+    <tr>
+        <td><strong>Connector Status</strong></td>
+        <td>Health and last-run timestamp for all 26 connectors</td>
+    </tr>
+    <tr>
+        <td><strong>MITRE ATT&CK Heatmap</strong></td>
+        <td>Visual representation of observed threat techniques</td>
+    </tr>
+</table>
+
+<h2 id="intel">Working with Intelligence</h2>
+
+<h3>Searching STIX Objects</h3>
+
+<p><strong>Basic Search:</strong></p>
+<ol>
+    <li>Click <strong>"Intelligence"</strong> in the main menu</li>
+    <li>Use the search bar to find IOCs, malware, threat actors, etc.</li>
+    <li>Results return all STIX object types: <code>ipv4-addr</code>, <code>domain-name</code>, <code>file</code>, <code>threat-actor</code>, <code>malware</code>, <code>attack-pattern</code>, etc.</li>
+</ol>
+
+<p><strong>Advanced Filtering:</strong></p>
+<ul>
+    <li><strong>By Type:</strong> Filter by object type (IOC, malware, actor, etc.)</li>
+    <li><strong>By TLP:</strong> Filter by Traffic Light Protocol marking (CLEAR, GREEN, AMBER, RED)</li>
+    <li><strong>By Source:</strong> Filter by connector name (OTX, MISP, CISA, etc.)</li>
+    <li><strong>By Confidence:</strong> Filter by confidence score (0–100)</li>
+    <li><strong>By Sightings:</strong> Find indicators with N or more sightings</li>
+</ul>
+
+<div class="note">
+    <strong>TLP Meanings:</strong>
+    <ul style="margin-top: 10px;">
+        <li><strong>TLP:CLEAR</strong> — Unlimited sharing</li>
+        <li><strong>TLP:GREEN</strong> — Community sharing with handling restrictions</li>
+        <li><strong>TLP:AMBER</strong> — Limited to need-to-know recipients</li>
+        <li><strong>TLP:RED</strong> — Not for sharing outside recipient's organization</li>
+    </ul>
+</div>
+
+<h3>Viewing Object Details</h3>
+
+<p>Click any object to see full details:</p>
+<ul>
+    <li><strong>Core attributes</strong> — value, type, first/last seen, confidence</li>
+    <li><strong>Relationships</strong> — linked objects (e.g., IP used by malware, malware used by threat actor)</li>
+    <li><strong>Sightings</strong> — sources and dates this indicator was observed</li>
+    <li><strong>Enrichment</strong> — external API results (GreyNoise, VirusTotal, etc.)</li>
+    <li><strong>TLP & Tags</strong> — traffic light protocol and custom tags</li>
+    <li><strong>History</strong> — who created/modified object and when</li>
+</ul>
+
+<h3>Creating Custom Intelligence Objects</h3>
+
+<p>Analysts can manually add intelligence:</p>
+
+<div class="step">
+    <ol>
+        <li>Click <strong>"+ Create Object"</strong> in the Intelligence section</li>
+        <li>Select object type:
+            <ul style="margin-top: 10px;">
+                <li><code>ipv4-addr</code> / <code>ipv6-addr</code> — IP addresses</li>
+                <li><code>domain-name</code> — Domain names</li>
+                <li><code>file</code> — File hashes (MD5, SHA1, SHA256)</li>
+                <li><code>url</code> — URLs</li>
+                <li><code>threat-actor</code> — Threat groups</li>
+                <li><code>malware</code> — Malware families</li>
+                <li><code>attack-pattern</code> — MITRE ATT&CK techniques</li>
+                <li><code>relationship</code> — Links between objects</li>
+            </ul>
+        </li>
+        <li>Fill in object attributes (value, names, descriptions, etc.)</li>
+        <li>Set TLP level (default: AMBER)</li>
+        <li>Add tags for tracking</li>
+        <li>Click <strong>"Create"</strong></li>
+    </ol>
+</div>
+
+<h3>Editing & Deleting Objects</h3>
+
+<ul>
+    <li><strong>Edit:</strong> Click the pencil icon on an object → modify fields → <strong>"Save"</strong></li>
+    <li><strong>Delete:</strong> Click the trash icon → confirm deletion (admins only)</li>
+    <li><strong>Relationships:</strong> Create links between objects (e.g., "IP hosted malware X")</li>
+</ul>
+
+<h2 id="hunting">Threat Hunting</h2>
+
+<h3>Pivot Search</h3>
+
+<p>SOCint's most powerful feature for correlation hunting:</p>
+
+<div class="step">
+    <ol>
+        <li>Click <strong>"Hunting"</strong> in the main menu</li>
+        <li>Enter a search term in the pivot box:
+            <ul style="margin-top: 10px;">
+                <li>IOC (IP, domain, hash, URL)</li>
+                <li>Threat actor name (e.g., "APT1", "Lazarus")</li>
+                <li>Malware family (e.g., "Emotet", "Trickbot")</li>
+                <li>MITRE technique ID (e.g., "T1566")</li>
+            </ul>
+        </li>
+        <li>Results return:
+            <ul style="margin-top: 10px;">
+                <li><strong>STIX Objects</strong> — Matching IOCs, actors, malware</li>
+                <li><strong>Sigma Rules</strong> — Detection rules covering techniques used by results</li>
+                <li><strong>YARA Rules</strong> — File-based detection rules</li>
+                <li><strong>Threat Actors</strong> — Groups linked to your search term</li>
+                <li><strong>Malware Families</strong> — Malware associated with actors/techniques</li>
+            </ul>
+        </li>
+        <li>Click any result to drill down for investigation</li>
+    </ol>
+</div>
+
+<p><strong>Example hunting workflow:</strong></p>
+<ol>
+    <li>Incident team reports IP <code>192.0.2.10</code> in firewall logs</li>
+    <li>Pivot search on the IP → returns 3 matching IOCs</li>
+    <li>View relationships → IP is used by malware "ZeuS"</li>
+    <li>Search malware → links to threat actor "Carbanak"</li>
+    <li>View techniques used by Carbanak → T1566 (phishing), T1547 (persistence)</li>
+    <li>Fetch Sigma rules for T1566 → deploy to SIEM</li>
+    <li>Create case "Carbanak Investigation" and link observables</li>
+</ol>
+
+<h2 id="cases">Case Management</h2>
+
+<h3>Creating a Case</h3>
+
+<div class="step">
+    <ol>
+        <li>Click <strong>"Cases"</strong> in the main menu</li>
+        <li>Click <strong>"+ New Case"</strong></li>
+        <li>Fill in:
+            <ul style="margin-top: 10px;">
+                <li><strong>Title</strong> — Brief case name (e.g., "Emotet Campaign Jan 2024")</li>
+                <li><strong>Description</strong> — Detailed context</li>
+                <li><strong>Severity</strong> — low, medium, high, critical</li>
+                <li><strong>TLP</strong> — Traffic Light Protocol level</li>
+                <li><strong>Tags</strong> — Custom tags for filtering (e.g., "ransomware", "apt1")</li>
+            </ul>
+        </li>
+        <li>Click <strong>"Create Case"</strong></li>
+    </ol>
+</div>
+
+<h3>Working with Observables</h3>
+
+<p>Observables are artifacts linked to a case (IOCs, file hashes, URLs, usernames, etc.):</p>
+
+<div class="step">
+    <strong>Add Observable:</strong>
+    <ol>
+        <li>Open a case → click <strong>"+ Add Observable"</strong></li>
+        <li>Select type: ipv4, domain, file hash, url, username, email, etc.</li>
+        <li>Enter value</li>
+        <li>Toggle <strong>"Is IOC"</strong> if it's an indicator of compromise</li>
+        <li>Add tags</li>
+        <li>Click <strong>"Add"</strong></li>
+    </ol>
+</div>
+
+<p><strong>Bulk Add Observables:</strong> Paste comma-separated or newline-separated IOCs in bulk import.</p>
+
+<h3>Tasks & Workflow</h3>
+
+<p>Track investigation progress with tasks:</p>
+
+<div class="step">
+    <ol>
+        <li>Click <strong>"+ Add Task"</strong> within a case</li>
+        <li>Enter task title (e.g., "Check if IP in passive DNS")</li>
+        <li>Add optional description</li>
+        <li>Assign to team member or mark unassigned</li>
+        <li>Mark complete when done</li>
+    </ol>
+</div>
+
+<h3>Comments & Collaboration</h3>
+
+<ul>
+    <li><strong>Add Comment:</strong> Click comment icon → add note → <strong>"Post"</strong></li>
+    <li><strong>Mention Team:</strong> Type <code>@username</code> to notify colleagues</li>
+    <li><strong>Edit/Delete:</strong> Own comments can be edited or deleted</li>
+</ul>
+
+<h3>Case Status & Lifecycle</h3>
+
+<p>Cases progress through statuses:</p>
+<ul>
+    <li><strong>Open</strong> — Active investigation</li>
+    <li><strong>In Progress</strong> — Currently being worked</li>
+    <li><strong>Closed</strong> — Investigation concluded</li>
+    <li><strong>Archived</strong> — Old case, hidden by default</li>
+</ul>
+
+<p>Update status via the case detail dropdown.</p>
+
+<h3>Compliance Tags</h3>
+
+<p>Link cases to compliance frameworks for reporting:</p>
+<ul>
+    <li><strong>NIST 800-53</strong> — Map controls (e.g., SI-4 Information System Monitoring)</li>
+    <li><strong>CSF Tags</strong> — NIST Cybersecurity Framework functions (Identify, Protect, Detect, Respond, Recover)</li>
+</ul>
+
+<p>Select tags when creating/editing case → use in compliance reports.</p>
+
+<h3>Exporting Cases</h3>
+
+<ul>
+    <li>Click <strong>"Export"</strong> button → choose format (JSON, CSV, PDF)</li>
+    <li>Exported file includes all observables, tasks, comments, and metadata</li>
+</ul>
+
+<h2 id="rules">Detection Rules</h2>
+
+<h3>Viewing Rules</h3>
+
+<p>Click <strong>"Rules"</strong> in the main menu to browse detection rules:</p>
+
+<table>
+    <tr>
+        <th>Rule Type</th>
+        <th>Purpose</th>
+        <th>Detects</th>
+    </tr>
+    <tr>
+        <td><strong>Sigma Rules</strong></td>
+        <td>SIEM-agnostic detection logic</td>
+        <td>Log patterns, behavioral anomalies</td>
+    </tr>
+    <tr>
+        <td><strong>YARA Rules</strong></td>
+        <td>File-based detection (malware scanning)</td>
+        <td>Malware strings, PE sections, byte patterns</td>
+    </tr>
+    <tr>
+        <td><strong>Custom Rules</strong></td>
+        <td>Organization-specific detection</td>
+        <td>Any IOC or pattern</td>
+    </tr>
+</table>
+
+<h3>Creating a Detection Rule</h3>
+
+<div class="step">
+    <ol>
+        <li>Click <strong>"+ Create Rule"</strong></li>
+        <li>Choose rule type (Sigma, YARA, or custom)</li>
+        <li>For <strong>Sigma rules</strong>:
+            <ul style="margin-top: 10px;">
+                <li>Name, description</li>
+                <li>Map MITRE ATT&CK techniques</li>
+                <li>Set severity (informational, low, medium, high, critical)</li>
+                <li>Write YAML-formatted Sigma detection logic</li>
+                <li>Example: detect PowerShell execution with suspicious flags</li>
+            </ul>
+        </li>
+        <li>For <strong>YARA rules</strong>:
+            <ul style="margin-top: 10px;">
+                <li>Name, description</li>
+                <li>Write YARA detection strings</li>
+                <li>Specify file patterns to scan</li>
+            </ul>
+        </li>
+        <li>Click <strong>"Create"</strong></li>
+    </ol>
+</div>
+
+<h3>Testing Rules</h3>
+
+<ul>
+    <li>Click <strong>"Test"</strong> on a rule → upload test file or log sample</li>
+    <li>View matches instantly</li>
+    <li>Iterate until rule triggers on malicious samples only</li>
+</ul>
+
+<h3>Deploying Rules</h3>
+
+<ul>
+    <li><strong>Sigma:</strong> Export and deploy to Splunk, ELK, Graylog, etc. via SIEM connectors</li>
+    <li><strong>YARA:</strong> Export and deploy to malware scanning workflows (yara CLI, integration tools)</li>
+    <li><strong>Status:</strong> Mark rule as <strong>"Active"</strong> or <strong>"Inactive"</strong> in SOCint</li>
+</ul>
+
+<h2 id="darkweb">Dark Web Monitoring</h2>
+
+<h3>Accessing Dark Web Intel</h3>
+
+<p>SOCint monitors dark web markets and forums automatically:</p>
+
+<ol>
+    <li>Click <strong>"Dark Web"</strong> in the main menu</li>
+    <li>Browse feeds by source:
+        <ul style="margin-top: 10px;">
+            <li>Dark web marketplaces (stolen data, credentials)</li>
+            <li>Hacking forums (exploit announcements, threat actor chatter)</li>
+            <li>Paste sites (leaked databases)</li>
+        </ul>
+    </li>
+    <li>Search for:
+        <ul style="margin-top: 10px;">
+            <li>Your organization name or domain</li>
+            <li>Known threat actor handles</li>
+            <li>Specific vulnerabilities or exploits</li>
+            <li>Employee email addresses or names</li>
+        </ul>
+    </li>
+</ol>
+
+<h3>Alerts on New Mentions</h3>
+
+<ul>
+    <li>Enable <strong>"Watch"</strong> on your organization or keywords</li>
+    <li>Receive real-time SSE alerts when new mentions appear</li>
+    <li>Create cases directly from dark web findings</li>
+</ul>
+
+<h2 id="enrichment">Enrichment</h2>
+
+<h3>On-Demand Enrichment</h3>
+
+<p>Enrich IOCs with external intelligence sources:</p>
+
+<div class="step">
+    <ol>
+        <li>Search or view an IOC in Intelligence section</li>
+        <li>Click <strong>"Enrich"</strong> button</li>
+        <li>SOCint queries:
+            <ul style="margin-top: 10px;">
+                <li><strong>GreyNoise</strong> — Is this IP malicious or harmless Internet noise?</li>
+                <li><strong>VirusTotal</strong> — File hash detections, URL analysis</li>
+                <li><strong>OTX</strong> — Pulse data, references</li>
+                <li><strong>AbuseIPDB</strong> — Abuse reports on IP</li>
+            </ul>
+        </li>
+        <li>Results cached for 24 hours</li>
+        <li>View enrichment in object details</li>
+    </ol>
+</div>
+
+<h3>Bulk Enrichment</h3>
+
+<ul>
+    <li>Select multiple IOCs → click <strong>"Enrich Selected"</strong></li>
+    <li>Queued asynchronously, results appear as they complete</li>
+</ul>
+
+<h2 id="compliance">Compliance & Reporting</h2>
+
+<h3>NIST 800-53 Mapping</h3>
+
+<p>Link investigation findings to security controls:</p>
+
+<ul>
+    <li><strong>SI-4:</strong> Information System Monitoring — detection of malicious activity</li>
+    <li><strong>CA-8:</strong> Penetration Testing — hunting results</li>
+    <li><strong>IR-4:</strong> Incident Handling — case management</li>
+</ul>
+
+<p>Tag cases with relevant controls; use in compliance reports.</p>
+
+<h3>CSF Mapping</h3>
+
+<p>Align findings to NIST Cybersecurity Framework:</p>
+<ul>
+    <li><strong>Identify</strong> — Asset/vulnerability discovery</li>
+    <li><strong>Protect</strong> — Detection rules deployed</li>
+    <li><strong>Detect</strong> — Alerts, hunts, IoC matches</li>
+    <li><strong>Respond</strong> — Case management, incident response</li>
+    <li><strong>Recover</strong> — Forensics, post-incident tuning</li>
+</ul>
+
+<h3>Generating Reports</h3>
+
+<ol>
+    <li>Click <strong>"Reports"</strong> in the main menu</li>
+    <li>Select report type:
+        <ul style="margin-top: 10px;">
+            <li><strong>Threat Summary</strong> — Top IOCs, threat actors, techniques by period</li>
+            <li><strong>Compliance Report</strong> — Cases mapped to NIST 800-53, CSF</li>
+            <li><strong>Hunting Results</strong> — Summary of detection activity</li>
+            <li><strong>Custom Report</strong> — User-defined scope and filters</li>
+        </ul>
+    </li>
+    <li>Choose date range, confidence thresholds, TLP levels</li>
+    <li>Generate → view online or download as PDF/CSV</li>
+</ol>
+
+<h2 id="api">API & Integration</h2>
+
+<h3>REST API Overview</h3>
+
+<p>SOCint exposes full REST API for programmatic access:</p>
+
+<table>
+    <tr>
+        <th>Endpoint</th>
+        <th>Method</th>
+        <th>Purpose</th>
+    </tr>
+    <tr>
+        <td><code>/api/auth/login</code></td>
+        <td>POST</td>
+        <td>Authenticate and get JWT token</td>
+    </tr>
+    <tr>
+        <td><code>/api/intel/objects</code></td>
+        <td>GET, POST, PATCH, DELETE</td>
+        <td>STIX object CRUD</td>
+    </tr>
+    <tr>
+        <td><code>/api/intel/objects/search</code></td>
+        <td>GET</td>
+        <td>Search IOCs with filters</td>
+    </tr>
+    <tr>
+        <td><code>/api/hunting/pivot</code></td>
+        <td>GET</td>
+        <td>Pivot search across all intel</td>
+    </tr>
+    <tr>
+        <td><code>/api/cases</code></td>
+        <td>GET, POST</td>
+        <td>Case CRUD</td>
+    </tr>
+    <tr>
+        <td><code>/api/rules</code></td>
+        <td>GET, POST</td>
+        <td>Detection rule management</td>
+    </tr>
+    <tr>
+        <td><code>/api/enrichment</code></td>
+        <td>POST</td>
+        <td>Enrich IOCs</td>
+    </tr>
+    <tr>
+        <td><code>/stream</code></td>
+        <td>GET (SSE)</td>
+        <td>Real-time alert stream</td>
+    </tr>
+</table>
+
+<h3>Authentication</h3>
+
+<pre><code>curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"secret"}'
+
+# Response:
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+
+# Use token in subsequent requests:
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  http://localhost:8000/api/intel/objects?type=ipv4-addr</code></pre>
+
+<h3>Example: Search IOCs</h3>
+
+<pre><code>curl "http://localhost:8000/api/intel/objects?type=ipv4-addr&q=192.0&tlp=TLP:CLEAR" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Response:
+{
+  "results": [
+    {
+      "id": "ipv4-addr--12345678-1234-1234-1234-123456789012",
+      "type": "ipv4-addr",
+      "value": "192.0.2.10",
+      "created": "2024-01-15T10:30:00Z",
+      "confidence": 95,
+      "tlp": "TLP:CLEAR",
+      "source": "OTX",
+      "sightings": 15
+    }
+  ],
+  "total": 1
+}</code></pre>
+
+<h3>Real-Time Alert Stream (SSE)</h3>
+
+<pre><code>curl -N -H "Authorization: Bearer YOUR_TOKEN" \
+  http://localhost:8000/stream
+
+# Stream will continuously send events:
+data: {"type":"new_ioc","ioc":"192.0.2.100","source":"NVD"}
+data: {"type":"rule_match","rule":"Emotet C2 Detection","severity":"high"}
+data: {"type":"dark_web_mention","term":"acme.com","source":"forum"}</code></pre>
+
+<h3>GraphQL API</h3>
+
+<p>Alternative to REST for complex queries:</p>
+
+<pre><code>POST /graphql
+{
+  "query": "query { searchIOCs(type: \"ipv4-addr\", query: \"192.0\") { id value confidence source } }"
+}</code></pre>
+
+<h2 id="faq">FAQ & Troubleshooting</h2>
+
+<h3>Q: What's the difference between TLP levels?</h3>
+<p><strong>A:</strong> Traffic Light Protocol (TLP) controls how intelligence can be shared. CLEAR = unrestricted, GREEN = community sharing, AMBER = limited distribution, RED = internal only. Filter searches by TLP to respect data handling agreements.</p>
+
+<h3>Q: How often are connectors updated?</h3>
+<p><strong>A:</strong> Connectors run on a schedule (6–24 hours). Admin controls frequency. Check Connector Status dashboard for last-run timestamp.</p>
+
+<h3>Q: Can I bulk import IOCs?</h3>
+<p><strong>A:</strong> Yes. In Cases, click "Bulk Import" and paste newline-separated IOCs. SOCint deduplicates and links to your case.</p>
+
+<h3>Q: What happens if an IOC is too old?</h3>
+<p><strong>A:</strong> SOCint ages IOCs daily. After 90 days without sighting, confidence drops. Sightings reset the clock (unless case reference exempts).</p>
+
+<h3>Q: How do I share intelligence with other organizations?</h3>
+<p><strong>A:</strong> Export cases or IOCs. Filter by TLP:CLEAR or TLP:GREEN for shareable data. Never export TLP:RED externally.</p>
+
+<h3>Q: Can I create detection rules without writing Sigma?</h3>
+<p><strong>A:</strong> Admin provides template rules. Clone and edit. Admins can also set up rule libraries from external sources (SIGMA repository).</p>
+
+<h3>Q: How do I integrate SOCint with my SIEM?</h3>
+<p><strong>A:</strong> Contact admin to enable connectors (Splunk, ELK, Graylog). Use Sigma rules export. Or build custom integration via REST API.</p>
+
+<h3>Q: What's the API rate limit?</h3>
+<p><strong>A:</strong> Contact admin. Default is 1000 requests/minute per user. Bulk operations are queued.</p>
+
+<h3>Q: I lost my API key. What do I do?</h3>
+<p><strong>A:</strong> Go to Settings → API Keys → revoke lost key → create new key. Old key is invalidated immediately.</p>
+
+<h3>Q: Search returns no results. Why?</h3>
+<p><strong>A:</strong> Check TLP filters (your role may not see all levels). Try broader search term. Ask admin if connectors are running.</p>
+
+<h3>Q: Can I export a case as a report?</h3>
+<p><strong>A:</strong> Yes. Click Case → Export → choose PDF or JSON. PDF includes observables, tasks, comments, compliance tags.</p>
+
+</div>
+</body>
+</html>

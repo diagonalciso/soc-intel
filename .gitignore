@@ -1,0 +1,59 @@
+# Secrets — never commit
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# Logs
+*.log
+nohup.out
+
+# Dev/test artifacts
+validate_connectors.py
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+# --- baseline safety (added on extraction to independent repo) ---
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.key
+*.pem
+*.jks
+*.keystore
+key.properties
+keystore.properties
+id_rsa
+id_ed25519
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+node_modules/
+dist/
+build/
+.gradle/
+.cxx/
+*.gguf
+*.onnx
+.DS_Store
