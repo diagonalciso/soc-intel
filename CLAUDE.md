@@ -17,7 +17,7 @@ SOCint is a **threat intelligence platform** — think of it as Google for secur
 
 ## Project Overview
 
-SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 22 built-in data connectors, on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack with:
+SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 43 built-in data connectors (33 scheduled), on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack with:
 - **Backend:** Python FastAPI server (REST + GraphQL)
 - **Frontend:** React 18 + Vite (modern, fast)
 - **Database:** PostgreSQL (structured data) + OpenSearch (threat indices)
@@ -152,10 +152,10 @@ api/stream/              # SSE endpoints (real-time alerts)
 api/graphql/             # Strawberry GraphQL (ready to use)
 connectors/
   sdk/base.py            # BaseConnector + ConnectorConfig + IngestResult
-  builtin/               # 26 built-in connectors
+  builtin/               # 43 built-in connectors (33 registered in scheduler)
 workers/
   main.py                # Entry point, signal handling
-  scheduler.py           # APScheduler registration of all 26 connectors
+  scheduler.py           # APScheduler registration of 33 connectors
   alert_matcher.py       # Detection rule evaluation
 enrichment/
   pipeline.py            # Parallel enrichment engine
