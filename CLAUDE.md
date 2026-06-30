@@ -94,10 +94,16 @@ npm run preview
 ### Testing
 ```bash
 cd backend
-pytest
-pytest tests/path/to/test_file.py::test_name   # single test
-python validate_connectors.py   # test connectors without full stack
+pytest                                          # offline unit suite (no stack needed)
+pytest tests/test_connector_contract.py         # contract over all built-in connectors
+pytest tests/path/to/test_file.py::test_name    # single test
+python ../validate_connectors.py                # exercise connectors live (mocked push)
 ```
+The `pytest` suite (`backend/tests/`) is offline and fast (<1s): it pins the
+deterministic UUID5 dedup contract (`test_stix_dedup.py`) and asserts every
+built-in connector imports, instantiates with a valid `ConnectorConfig`, and
+exposes an async `run()` (`test_connector_contract.py`). `validate_connectors.py`
+is the heavier check that actually runs each connector with network/push mocked.
 
 ### Database migrations
 Alembic migrations run automatically at startup via FastAPI lifespan. To run manually:
