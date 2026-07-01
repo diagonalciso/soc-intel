@@ -161,9 +161,13 @@ services:
   tor:
     image: dperson/torproxy:latest
     restart: unless-stopped
-    ports:
-      - "9050:9050"
-      - "8118:8118"
+    # No host port publish: socint services reach Tor over the internal
+    # docker network as `tor:9050` (TOR_PROXY). Publishing 9050 on the host
+    # collides with the host tor.service that the onion scrapers use, which
+    # made socint fail to start after a reboot. Keep Tor internal-only.
+    expose:
+      - "9050"
+      - "8118"
     networks: [socint]
 
 volumes:
