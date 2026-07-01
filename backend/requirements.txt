@@ -35,7 +35,7 @@ taxii2-client==2.3.0
 
 # HTTP client
 httpx[socks]==0.27.0
-aiohttp==3.9.5
+aiohttp==3.14.1
 
 # Pydantic
 pydantic==2.8.2
