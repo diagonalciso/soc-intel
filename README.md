@@ -81,6 +81,11 @@ SOCINT combines indicator management, dark web tracking, case management, enrich
 | AbuseIPDB | IP | Free tier |
 | VirusTotal | IP, domain, URL, hash | Paid |
 
+These 4 providers are wired into the parallel enrichment pipeline
+(`app/enrichment/pipeline.py`) and run on-demand per observable. Additional
+enricher connectors ship in `connectors/builtin/` (Criminal IP, Hudson Rock)
+but are not yet registered in the pipeline — add them there to activate.
+
 ---
 
 ## Quick Start
