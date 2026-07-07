@@ -31,6 +31,7 @@ from app.connectors.builtin.taxii_import import TAXIIImportConnector
 from app.connectors.builtin.sigma_rules import SigmaRulesConnector
 from app.connectors.builtin.malwarebazaar import MalwareBazaarConnector
 from app.connectors.builtin.malpedia import MalpediaConnector
+from app.connectors.builtin.misp_galaxy import MISPGalaxyConnector
 from app.connectors.builtin.yara_rules import YaraRulesConnector
 from app.connectors.builtin.phishtank import PhishTankConnector
 from app.connectors.builtin.pulsedive import PulsediveConnector
@@ -78,6 +79,7 @@ _SOURCE_RELIABILITY: dict[str, int] = {
     "nist-800-53":   98,
     "nist-csf":      98,
     "malpedia":      85,
+    "misp-galaxy":   80,
     "yara-rules":    80,
     "blocklist-de":  72,
     "c2-tracker":    78,
@@ -108,6 +110,7 @@ CONNECTORS = [
     SigmaRulesConnector(),
     MalwareBazaarConnector(),
     MalpediaConnector(),
+    MISPGalaxyConnector(),
     YaraRulesConnector(),
     PhishTankConnector(),
     PulsediveConnector(),

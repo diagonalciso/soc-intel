@@ -17,7 +17,7 @@ SOCint is a **threat intelligence platform** — think of it as Google for secur
 
 ## Project Overview
 
-SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 43 built-in data connectors (33 scheduled), on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack with:
+SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 44 built-in data connectors (34 scheduled), on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack with:
 - **Backend:** Python FastAPI server (REST + GraphQL)
 - **Frontend:** React 18 + Vite (modern, fast)
 - **Database:** PostgreSQL (structured data) + OpenSearch (threat indices)
@@ -48,6 +48,8 @@ MALPEDIA_API_KEY=<optional, free — malpedia.caad.fkie.fraunhofer.de → Accoun
 ```
 
 Optional connector keys (`MALPEDIA_API_KEY`, `VIRUSTOTAL_API_KEY`, `SHODAN_API_KEY`, etc.) are blank by default; the owning connector logs `<KEY> not set, skipping` and no-ops until set. Malpedia runs weekly (`0 6 * * 0`); after adding the key, restart `api` and trigger it via `POST /api/connectors/malpedia/trigger`.
+
+The **`misp-galaxy`** connector is the no-account alternative to Malpedia: it pulls the MISP Galaxy `malpedia` + `threat-actor` clusters from GitHub (CC0, no key) → ~3.7k malware + ~1k threat-actor STIX objects. Family ids match Malpedia's, so objects merge if the optional keyed Malpedia connector is also enabled. The abuse.ch connectors (urlhaus/threatfox/malwarebazaar/feodo) use no-key public bulk feeds — the Auth-Key requirement is only on abuse.ch's query API, which we don't use.
 
 **Step 3: Ensure OpenSearch memory (once per system)**
 ```bash
