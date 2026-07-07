@@ -52,6 +52,7 @@ SOCINT combines indicator management, dark web tracking, case management, enrich
 | NVD + EPSS | nvd.nist.gov + first.org | Daily 04:00 | Free; optional NVD_API_KEY |
 | MITRE ATT&CK | github.com/mitre/cti | Weekly Sun | Free, official |
 | Sigma Rules | SigmaHQ/sigma on GitHub | Weekly Mon | Free; Windows/Linux/network/cloud |
+| MISP Galaxy | github.com/MISP/misp-galaxy | Weekly Sun | Free, no account (CC0); malware + threat-actor taxonomy — no-key alternative to Malpedia |
 
 ### Enrichment (on-demand)
 
