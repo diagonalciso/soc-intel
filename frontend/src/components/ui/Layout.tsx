@@ -54,7 +54,7 @@ export default function Layout() {
         {/* Logo */}
         <div style={{ padding: '20px 16px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: 2, color: 'var(--accent)' }}>
-            SOCINT
+            SOC Intel
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
             Threat Intelligence
