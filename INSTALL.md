@@ -60,7 +60,7 @@ echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/diagonalciso/SOCint.git
+git clone https://github.com/diagonalciso/soc-intel.git
 cd SOCint
 
 # 2. Create your .env file
@@ -308,11 +308,11 @@ This will:
 
 Managing the service:
 ```bash
-sudo systemctl start socint
-sudo systemctl stop socint
-sudo systemctl restart socint
-sudo systemctl status socint
-journalctl -u socint -f       # Follow logs
+sudo systemctl start soc-intel
+sudo systemctl stop soc-intel
+sudo systemctl restart soc-intel
+sudo systemctl status soc-intel
+journalctl -u soc-intel -f       # Follow logs
 ```
 
 ### Reverse proxy (HTTPS)
@@ -320,7 +320,7 @@ journalctl -u socint -f       # Follow logs
 For production, put SOCINT behind nginx or Caddy with TLS. Example Caddy config:
 
 ```
-socint.yourdomain.com {
+soc-intel.yourdomain.com {
     reverse_proxy /api/* localhost:8000
     reverse_proxy /* localhost:3000
 }
@@ -329,7 +329,7 @@ socint.yourdomain.com {
 Update `.env`:
 ```env
 APP_ENV=production
-ALLOWED_ORIGINS=https://socint.yourdomain.com
+ALLOWED_ORIGINS=https://soc-intel.yourdomain.com
 ```
 
 ### Firewall

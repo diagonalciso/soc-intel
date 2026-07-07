@@ -30,7 +30,7 @@ SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, wi
 
 **Step 1: Prepare environment**
 ```bash
-cd ~/claude/socint
+cd ~/soc-intel
 cp .env.example .env
 chmod 600 .env
 
@@ -134,7 +134,7 @@ alembic upgrade head
 4. **Indicator decay** runs daily (03:00 UTC), reducing confidence on aged IoCs; revokes at 90 days unless a sighting exempts them.
 
 ### Key Design Decisions
-- **STIX 2.1 is the canonical format** — everything in OpenSearch is STIX JSON with socint extensions (`tlp`, `source`, `confidence`, `decay_score`, `sightings`)
+- **STIX 2.1 is the canonical format** — everything in OpenSearch is STIX JSON with soc-intel extensions (`tlp`, `source`, `confidence`, `decay_score`, `sightings`)
 - **Deterministic IDs** — `uuid5(type + ":" + value)` means the same IoC from multiple sources converges to one document (upsert, not duplicate)
 - **TLP everywhere** — every STIX object carries a canonical `tlp` field (CLEAR/GREEN/AMBER/AMBER+STRICT/RED)
 - **Source reliability weight** — per-connector `source_reliability` (0–100) multiplies into indicator confidence at ingest

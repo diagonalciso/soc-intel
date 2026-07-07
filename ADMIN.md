@@ -94,13 +94,13 @@ Clone the repository:
 
 ```bash
 cd ~/claude
-git clone https://github.com/diagonalciso/SOCint.git socint
-cd socint
+git clone https://github.com/diagonalciso/soc-intel.git soc-intel
+cd soc-intel
 ```
 
 Or if already cloned:
 ```bash
-cd ~/claude/socint
+cd ~/soc-intel
 ```
 
 ### Step 2: Create Configuration
@@ -342,10 +342,10 @@ Everything else can be regenerated.
 mkdir -p ~/backups
 
 # Backup command
-docker compose exec -T postgres pg_dump -U postgres socint > ~/backups/socint-$(date +%Y%m%d).sql
+docker compose exec -T postgres pg_dump -U postgres socint > ~/backups/soc-intel-$(date +%Y%m%d).sql
 
 # Restore (if database is corrupted)
-docker compose exec -T postgres psql -U postgres -d socint < ~/backups/socint-20260419.sql
+docker compose exec -T postgres psql -U postgres -d socint < ~/backups/soc-intel-20260419.sql
 ```
 
 **Automated backup (cron):**
@@ -354,7 +354,7 @@ docker compose exec -T postgres psql -U postgres -d socint < ~/backups/socint-20
 crontab -e
 
 # Add this line:
-# 2 * * * * docker compose -f ~/claude/socint/docker-compose.yml exec -T postgres pg_dump -U postgres socint > ~/backups/socint-$(date +\%Y\%m\%d).sql
+# 2 * * * * docker compose -f ~/soc-intel/docker-compose.yml exec -T postgres pg_dump -U postgres socint > ~/backups/soc-intel-$(date +\%Y\%m\%d).sql
 ```
 
 ### Backup OpenSearch Indices
@@ -507,12 +507,12 @@ sudo ufw deny 3000
 
 ```bash
 sudo apt install nginx
-sudo nano /etc/nginx/sites-enabled/socint
+sudo nano /etc/nginx/sites-enabled/soc-intel
 ```
 
 Paste:
 ```nginx
-upstream socint {
+upstream soc-intel {
     server 127.0.0.1:3000;
 }
 
@@ -527,7 +527,7 @@ server {
     auth_basic_user_file /etc/nginx/.htpasswd;
     
     location / {
-        proxy_pass http://socint;
+        proxy_pass http://soc-intel;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -569,7 +569,7 @@ echo "docker-compose.override.yml" >> .gitignore
 ### Check for Updates
 
 ```bash
-cd ~/claude/socint
+cd ~/soc-intel
 git status                 # Shows if repo has changes
 git log --oneline -5       # Shows recent commits
 ```

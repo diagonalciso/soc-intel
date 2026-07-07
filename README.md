@@ -67,7 +67,7 @@ SOCINT combines indicator management, dark web tracking, case management, enrich
 ## Quick Start
 
 ```bash
-git clone https://github.com/diagonalciso/SOCint.git
+git clone https://github.com/diagonalciso/soc-intel.git
 cd SOCint
 
 cp .env.example .env
@@ -264,7 +264,7 @@ Register it in `backend/app/workers/scheduler.py`.
 Test all connectors against live sources without needing the full stack:
 
 ```bash
-cd /path/to/socint
+cd /path/to/soc-intel
 pip install -r backend/requirements.txt
 python validate_connectors.py
 ```
