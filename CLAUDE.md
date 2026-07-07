@@ -157,10 +157,10 @@ api/stream/              # SSE endpoints (real-time alerts)
 api/graphql/             # Strawberry GraphQL (ready to use)
 connectors/
   sdk/base.py            # BaseConnector + ConnectorConfig + IngestResult
-  builtin/               # 43 built-in connectors (33 registered in scheduler)
+  builtin/               # 44 built-in connectors (34 registered in scheduler)
 workers/
   main.py                # Entry point, signal handling
-  scheduler.py           # APScheduler registration of 33 connectors
+  scheduler.py           # APScheduler registration of 34 connectors
   alert_matcher.py       # Detection rule evaluation
 enrichment/
   pipeline.py            # Parallel enrichment engine
