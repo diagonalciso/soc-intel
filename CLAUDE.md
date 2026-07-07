@@ -44,7 +44,10 @@ SECRET_KEY=<paste generated secret>
 CONNECTOR_API_KEY=<paste another generated secret>
 SEED_ADMIN_PASSWORD=YourAdminPassword123!
 OTX_API_KEY=<optional, from otx.alienvault.com>
+MALPEDIA_API_KEY=<optional, free — malpedia.caad.fkie.fraunhofer.de → Account → API>
 ```
+
+Optional connector keys (`MALPEDIA_API_KEY`, `VIRUSTOTAL_API_KEY`, `SHODAN_API_KEY`, etc.) are blank by default; the owning connector logs `<KEY> not set, skipping` and no-ops until set. Malpedia runs weekly (`0 6 * * 0`); after adding the key, restart `api` and trigger it via `POST /api/connectors/malpedia/trigger`.
 
 **Step 3: Ensure OpenSearch memory (once per system)**
 ```bash
