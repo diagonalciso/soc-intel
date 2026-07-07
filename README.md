@@ -9,7 +9,7 @@ SOCINT combines indicator management, dark web tracking, case management, enrich
 ## Features
 
 - **STIX 2.1 native** — all threat objects stored and exchanged as STIX 2.1
-- **22 built-in connectors** — abuse.ch, OTX, MISP feeds, TAXII, CISA KEV, NVD, MITRE ATT&CK, Sigma rules, ransomware trackers, and more
+- **44 built-in connectors** (35 scheduled) — abuse.ch, OTX, MISP feeds + Galaxy, TAXII, CISA KEV, NVD/EPSS, MITRE ATT&CK, Sigma + YARA rules, ransomware trackers, and more
 - **Dark web as first-class** — Tor-based ransomware leak site scraping, victim tracking, IAB listings, credential exposures, stealer logs
 - **IOC deduplication** — deterministic indicator IDs (UUID5 of type:value) prevent duplicates across all import sources
 - **FP suppression** — MISP warning lists filter top-1000 domains, CDN ranges, cloud IPs before storage
@@ -32,16 +32,21 @@ SOCINT combines indicator management, dark web tracking, case management, enrich
 
 ### Import (automated, scheduled)
 
+35 connectors registered in the scheduler (of 44 built-in). In registration order:
+
 | Connector | Source | Schedule | Notes |
 |-----------|--------|----------|-------|
-| AlienVault OTX | otx.alienvault.com | Every 2h | Requires free API key |
+| AlienVault OTX | otx.alienvault.com | Every 2h | Requires free API key (OTX_API_KEY) |
 | MISP Public Feeds | Botvrij.eu + abuse.ch | Every 4h | Free |
 | TAXII 2.1 | Anomali Limo (free) | Every 6h | Free, guest/guest |
 | Ransomwatch | joshhighet/ransomwatch | Every 2h | Free, archived feed |
 | Ransomware.live | api.ransomware.live/v2 | Every 2h | Free, victims + group profiles |
 | RansomLook | ransomlook.io | Every 3h | Free CC BY 4.0 |
-| DeepDarkCTI | fastfire/deepdarkCTI | Daily 06:00 | 200+ groups + onion URLs |
+| DeepDarkCTI | fastfire/deepdarkCTI | Daily 06:00 | Free, 200+ groups + onion URLs |
 | Ransomware Leak Sites | Tor scraper | Every 3h | Requires Tor proxy |
+| ShinyHunters Breach Tracker | ransomware.live + OTX | Daily 12:00 | Free |
+| CTI News Feed | Security RSS feeds | Every 2h | Free |
+| Telegram CTI Monitor | Telegram channels | Hourly | Requires Telegram config |
 | URLhaus | abuse.ch | Every 30min | Free |
 | ThreatFox | abuse.ch | Every 4h | Free |
 | Feodo Tracker | abuse.ch | Every 6h | Free |
@@ -50,9 +55,22 @@ SOCINT combines indicator management, dark web tracking, case management, enrich
 | SANS ISC DShield | isc.sans.edu | Every 12h | Free |
 | CISA KEV | cisa.gov | Every 12h | Free, official |
 | NVD + EPSS | nvd.nist.gov + first.org | Daily 04:00 | Free; optional NVD_API_KEY |
-| MITRE ATT&CK | github.com/mitre/cti | Weekly Sun | Free, official |
-| Sigma Rules | SigmaHQ/sigma on GitHub | Weekly Mon | Free; Windows/Linux/network/cloud |
-| MISP Galaxy | github.com/MISP/misp-galaxy | Weekly Sun | Free, no account (CC0); malware + threat-actor taxonomy — no-key alternative to Malpedia |
+| MITRE ATT&CK | github.com/mitre/cti | Weekly Sun 00:00 | Free, official |
+| Sigma Rules | SigmaHQ/sigma on GitHub | Weekly Mon 05:00 | Free; Windows/Linux/network/cloud |
+| MalwareBazaar | abuse.ch | Every 6h | Free (no-key bulk feed) |
+| Malpedia | malpedia.caad.fkie.fraunhofer.de | Weekly Sun 06:00 | Free key (register → Account → API); skips if MALPEDIA_API_KEY unset |
+| MISP Galaxy | github.com/MISP/misp-galaxy | Weekly Sun 06:00 | Free, no account (CC0); malware + threat-actor taxonomy — no-key alternative to Malpedia |
+| YARA Rules | Neo23x0/signature-base | Weekly Mon 05:00 | Free |
+| PhishTank | phishtank.org | Every 8h | Free |
+| Pulsedive | pulsedive.com | Every 6h | Free tier; optional PULSEDIVE_API_KEY |
+| OSV.dev | osv.dev | Every 6h | Free, supply-chain vulns |
+| URLScan.io | urlscan.io | Every 4h | Free; optional URLSCAN_API_KEY |
+| VulnCheck KEV | vulncheck.com | Every 12h | Optional VULNCHECK_API_KEY (extended KEV) |
+| NIST SP 800-53 | nist.gov | Weekly Sun 03:00 | Free, official (compliance controls) |
+| NIST CSF 2.0 | nist.gov | Weekly Sun 04:00 | Free, official (framework) |
+| Blocklist.de | blocklist.de | Every 4h | Free |
+| C2 Tracker | abuse.ch SSLBL | Every 3h | Free |
+| IPsum | stamparm/ipsum | Every 8h | Free, aggregated blocklist |
 
 ### Enrichment (on-demand)
 

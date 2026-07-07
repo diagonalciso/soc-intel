@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What Is SOCint?
 
 SOCint is a **threat intelligence platform** — think of it as Google for security threats. It:
-- Automatically collects threat data from 22 external feeds (vulnerability databases, ransomware trackers, hacker forums, etc.)
+- Automatically collects threat data from 35 external feeds (vulnerability databases, ransomware trackers, hacker forums, etc.)
 - Stores everything as STIX 2.1 (industry-standard threat format)
 - Lets you search for threats (IPs, domains, malware hashes, ransomware gangs)
 - Shows relationships between threats
@@ -17,7 +17,7 @@ SOCint is a **threat intelligence platform** — think of it as Google for secur
 
 ## Project Overview
 
-SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 44 built-in data connectors (34 scheduled), on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack with:
+SOCint is a unified threat intelligence platform (TIP) built around STIX 2.1, with 44 built-in data connectors (35 scheduled), on-demand enrichment, dark web monitoring, incident case management, and a MITRE ATT&CK heatmap. It runs as a multi-service Docker Compose stack with:
 - **Backend:** Python FastAPI server (REST + GraphQL)
 - **Frontend:** React 18 + Vite (modern, fast)
 - **Database:** PostgreSQL (structured data) + OpenSearch (threat indices)
@@ -157,10 +157,10 @@ api/stream/              # SSE endpoints (real-time alerts)
 api/graphql/             # Strawberry GraphQL (ready to use)
 connectors/
   sdk/base.py            # BaseConnector + ConnectorConfig + IngestResult
-  builtin/               # 44 built-in connectors (34 registered in scheduler)
+  builtin/               # 44 built-in connectors (35 registered in scheduler)
 workers/
   main.py                # Entry point, signal handling
-  scheduler.py           # APScheduler registration of 34 connectors
+  scheduler.py           # APScheduler registration of 35 connectors
   alert_matcher.py       # Detection rule evaluation
 enrichment/
   pipeline.py            # Parallel enrichment engine
