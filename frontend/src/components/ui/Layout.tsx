@@ -23,6 +23,25 @@ const NAV_ITEMS = [
 export default function Layout() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {/* Top-right Help button → user manual */}
+      <a
+        href="/api/docs/user-manual"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Manual / Help"
+        style={{
+          position: 'fixed', top: 12, right: 16, zIndex: 9999,
+          width: 32, height: 32, borderRadius: '50%',
+          background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+          color: 'var(--accent)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', fontSize: 16, fontWeight: 700,
+          textDecoration: 'none', boxShadow: '0 2px 8px rgba(0,0,0,.4)',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)' }}
+        onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)' }}
+      >
+        ?
+      </a>
       {/* Sidebar */}
       <nav style={{
         width: 220,

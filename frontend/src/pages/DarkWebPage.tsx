@@ -185,7 +185,7 @@ function RansomwareTable({ data }: { data: any[] }) {
           <tr key={i} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={tdStyle}><GroupBadge name={row.group_name} /></td>
             <td style={tdStyle}>{row.victim_name}</td>
-            <td style={{ ...tdStyle, color: 'var(--accent)' }}>{row.victim_domain}</td>
+            <td style={{ ...tdStyle, color: 'var(--accent)' }}><DomainLink value={row.victim_domain} /></td>
             <td style={tdStyle}>{row.country || '—'}</td>
             <td style={tdStyle}>{row.sector || '—'}</td>
             <td style={tdStyle}>{row.date_posted?.slice(0, 10) || '—'}</td>
@@ -395,6 +395,22 @@ function TelegramTable({ data }: { data: any[] }) {
         ))}
       </tbody>
     </table>
+  )
+}
+
+function DomainLink({ value }: { value?: string }) {
+  if (!value) return <>—</>
+  const isUrl = /^https?:\/\//i.test(value)
+  if (!isUrl) return <>{value}</>
+  let label = value
+  try {
+    label = new URL(value).hostname.replace(/^www\./, '') || value
+  } catch { /* keep raw */ }
+  return (
+    <a href={value} target="_blank" rel="noopener noreferrer"
+      style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+      {label} ↗
+    </a>
   )
 }
 
