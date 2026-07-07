@@ -228,7 +228,7 @@ export default function DashboardPage() {
         {/* Globe canvas */}
         <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <ThreatGlobe markers={globeMarkers} width={340} />
-          <div style={{ fontSize: 10, color: '#4a5568', letterSpacing: 1 }}>
+          <div style={{ fontSize: 10, color: '#6e7681', letterSpacing: 1 }}>
             RECENT INCIDENT LOCATIONS
           </div>
         </div>
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                   <div style={{ fontSize: 12, flex: 1, textTransform: 'capitalize' }}>
                     {country.toLowerCase()}
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#ef4444' }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#f85149' }}>
                     {count}
                   </div>
                   {/* mini bar */}
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                     <div style={{
                       height: '100%',
                       width: `${Math.round((count / (topCountries[0][1] as number)) * 100)}%`,
-                      background: '#ef4444', borderRadius: 2,
+                      background: '#f85149', borderRadius: 2,
                     }} />
                   </div>
                 </div>
@@ -287,27 +287,27 @@ export default function DashboardPage() {
           )}
 
           <div style={{ marginTop: 14, display: 'flex', gap: 16 }}>
-            <LegendDot color="#ef4444" label="Ransomware victim" />
+            <LegendDot color="#f85149" label="Ransomware victim" />
           </div>
         </div>
       </div>
 
       {/* Primary stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 10 }}>
-        <StatCard label="Ransom Victims" value={ransomStats?.total ?? 0} color="#ef4444" />
-        <StatCard label="Total Indicators" value={intelStats?.total ?? 0} color="#3b82f6" />
-        <StatCard label="Malicious URLs" value={urlCount} color="#f59e0b" />
-        <StatCard label="MITRE ATT&CK" value={mitreCount} color="#8b5cf6" />
+        <StatCard label="Ransom Victims" value={ransomStats?.total ?? 0} color="#f85149" />
+        <StatCard label="Total Indicators" value={intelStats?.total ?? 0} color="#58a6ff" />
+        <StatCard label="Malicious URLs" value={urlCount} color="#d29922" />
+        <StatCard label="MITRE ATT&CK" value={mitreCount} color="#bc8cff" />
       </div>
 
       {/* Secondary stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
-        <StatCard label="C2 Servers" value={c2Count} color="#ef4444" small />
-        <StatCard label="Phishing URLs" value={phishCount} color="#f97316" small />
+        <StatCard label="C2 Servers" value={c2Count} color="#f85149" small />
+        <StatCard label="Phishing URLs" value={phishCount} color="#e3873a" small />
         <StatCard label="Attack Sources" value={attackIpCount} color="#eab308" small />
-        <StatCard label="Malware IOCs" value={malwareIocCount} color="#06b6d4" small />
-        <StatCard label="Vulns (KEV)" value={vulnCount} color="#10b981" small />
-        <StatCard label="Cred Exposures" value={darkwebSummary?.credential_exposures ?? 0} color="#a855f7" small />
+        <StatCard label="Malware IOCs" value={malwareIocCount} color="#388bfd" small />
+        <StatCard label="Vulns (KEV)" value={vulnCount} color="#3fb950" small />
+        <StatCard label="Cred Exposures" value={darkwebSummary?.credential_exposures ?? 0} color="#bc8cff" small />
       </div>
 
       {/* Ransomware by group chart */}
@@ -316,10 +316,10 @@ export default function DashboardPage() {
           <h3 style={cardTitle}>Top Ransomware Groups</h3>
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <BarChart width={Math.max(300, byGroup.length * 60)} height={180} data={byGroup}>
-              <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
-              <Tooltip contentStyle={{ background: '#1e2533', border: '1px solid #2d3748', color: '#e2e8f0', fontSize: 12 }} />
-              <Bar dataKey="count" fill="#ef4444" radius={[3, 3, 0, 0]} />
+              <XAxis dataKey="name" tick={{ fill: '#8b949e', fontSize: 10 }} />
+              <YAxis tick={{ fill: '#8b949e', fontSize: 10 }} />
+              <Tooltip contentStyle={{ background: '#1c2128', border: '1px solid #30363d', color: '#e6edf3', fontSize: 12 }} />
+              <Bar dataKey="count" fill="#f85149" radius={[3, 3, 0, 0]} />
             </BarChart>
           </div>
         </div>
@@ -331,10 +331,10 @@ export default function DashboardPage() {
           <h3 style={cardTitle}>Intel by Source</h3>
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <BarChart width={Math.max(300, sourceData.length * 70)} height={180} data={sourceData}>
-              <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
-              <Tooltip contentStyle={{ background: '#1e2533', border: '1px solid #2d3748', color: '#e2e8f0', fontSize: 12 }} />
-              <Bar dataKey="count" fill="#3b82f6" radius={[3, 3, 0, 0]} />
+              <XAxis dataKey="name" tick={{ fill: '#8b949e', fontSize: 10 }} />
+              <YAxis tick={{ fill: '#8b949e', fontSize: 10 }} />
+              <Tooltip contentStyle={{ background: '#1c2128', border: '1px solid #30363d', color: '#e6edf3', fontSize: 12 }} />
+              <Bar dataKey="count" fill="#58a6ff" radius={[3, 3, 0, 0]} />
             </BarChart>
           </div>
         </div>
@@ -346,11 +346,11 @@ export default function DashboardPage() {
           <h3 style={cardTitle}>Ransomware Victims Over Time</h3>
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <LineChart width={Math.max(300, overTime.length * 40)} height={150} data={overTime}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-              <XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 10 }} tickFormatter={(v) => (v || '').slice(0, 7)} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} />
-              <Tooltip contentStyle={{ background: '#1e2533', border: '1px solid #2d3748', color: '#e2e8f0', fontSize: 12 }} />
-              <Line type="monotone" dataKey="count" stroke="#3b82f6" dot={false} strokeWidth={2} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
+              <XAxis dataKey="date" tick={{ fill: '#8b949e', fontSize: 10 }} tickFormatter={(v) => (v || '').slice(0, 7)} />
+              <YAxis tick={{ fill: '#8b949e', fontSize: 10 }} />
+              <Tooltip contentStyle={{ background: '#1c2128', border: '1px solid #30363d', color: '#e6edf3', fontSize: 12 }} />
+              <Line type="monotone" dataKey="count" stroke="#58a6ff" dot={false} strokeWidth={2} />
             </LineChart>
           </div>
         </div>
@@ -369,7 +369,7 @@ export default function DashboardPage() {
               <div style={{
                 fontSize: 10, padding: '2px 7px', borderRadius: 10,
                 background: a.severity === 'critical' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
-                color: a.severity === 'critical' ? '#ef4444' : '#f59e0b',
+                color: a.severity === 'critical' ? '#f85149' : '#d29922',
               }}>{a.severity}</div>
             </div>
           ))}
@@ -410,7 +410,7 @@ export default function DashboardPage() {
               {Object.entries(pivotResults.by_type).map(([type, count]) => (
                 <span key={type} style={{
                   fontSize: 10, padding: '2px 8px', borderRadius: 10,
-                  background: 'rgba(59,130,246,0.15)', color: '#3b82f6',
+                  background: 'rgba(59,130,246,0.15)', color: '#58a6ff',
                 }}>
                   {type} ({count})
                 </span>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
                   background: 'var(--bg-primary)',
                 }}
               >
-                <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 10, background: 'rgba(59,130,246,0.15)', color: '#3b82f6' }}>
+                <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 10, background: 'rgba(59,130,246,0.15)', color: '#58a6ff' }}>
                   {obj.type}
                 </span>
                 <span style={{ fontSize: 12 }}>{obj.name || obj.id}</span>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
               </div>
               <div style={{
                 fontSize: 10, padding: '2px 7px', borderRadius: 10,
-                background: 'rgba(16,185,129,0.15)', color: '#10b981', whiteSpace: 'nowrap',
+                background: 'rgba(16,185,129,0.15)', color: '#3fb950', whiteSpace: 'nowrap',
               }}>
                 active
               </div>

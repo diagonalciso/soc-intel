@@ -13,18 +13,18 @@ const getCsfElements      = () => api.get('/compliance/csf/elements').then(r => 
 // ── Colours ────────────────────────────────────────────────────────
 
 const FUNCTION_COLORS: Record<string, string> = {
-  GV: '#8b5cf6',
-  ID: '#3b82f6',
-  PR: '#10b981',
-  DE: '#f59e0b',
-  RS: '#ef4444',
-  RC: '#06b6d4',
+  GV: '#bc8cff',
+  ID: '#58a6ff',
+  PR: '#3fb950',
+  DE: '#d29922',
+  RS: '#f85149',
+  RC: '#388bfd',
 }
 
 const BASELINE_COLORS: Record<string, string> = {
-  LOW:      '#10b981',
-  MODERATE: '#f59e0b',
-  HIGH:     '#ef4444',
+  LOW:      '#3fb950',
+  MODERATE: '#d29922',
+  HIGH:     '#f85149',
 }
 
 // ── Component ──────────────────────────────────────────────────────
@@ -47,11 +47,11 @@ export default function CompliancePage() {
       {/* Stats bar */}
       {stats && (
         <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-          <StatCard label="SP 800-53 Controls" value={stats.nist_800_53?.controls ?? 0} color="#3b82f6" />
-          <StatCard label="Rules Tagged" value={stats.nist_800_53?.rules_tagged ?? 0} color="#8b5cf6" />
-          <StatCard label="Cases Tagged (800-53)" value={stats.nist_800_53?.cases_tagged ?? 0} color="#f59e0b" />
-          <StatCard label="CSF Elements" value={stats.csf?.elements ?? 0} color="#10b981" />
-          <StatCard label="Cases Tagged (CSF)" value={stats.csf?.cases_tagged ?? 0} color="#06b6d4" />
+          <StatCard label="SP 800-53 Controls" value={stats.nist_800_53?.controls ?? 0} color="#58a6ff" />
+          <StatCard label="Rules Tagged" value={stats.nist_800_53?.rules_tagged ?? 0} color="#bc8cff" />
+          <StatCard label="Cases Tagged (800-53)" value={stats.nist_800_53?.cases_tagged ?? 0} color="#d29922" />
+          <StatCard label="CSF Elements" value={stats.csf?.elements ?? 0} color="#3fb950" />
+          <StatCard label="Cases Tagged (CSF)" value={stats.csf?.cases_tagged ?? 0} color="#388bfd" />
         </div>
       )}
 
@@ -149,8 +149,8 @@ function Controls80053Panel() {
             }}
           >
             <span style={{ fontWeight: 700, marginRight: 6 }}>{f.family}</span>
-            <span style={{ color: '#4a5568', fontSize: 11 }}>{f.count}</span>
-            <div style={{ fontSize: 10, color: '#4a5568', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <span style={{ color: '#6e7681', fontSize: 11 }}>{f.count}</span>
+            <div style={{ fontSize: 10, color: '#6e7681', marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {f.name}
             </div>
           </button>
@@ -203,14 +203,14 @@ function Controls80053Panel() {
                 {c.is_enhancement && (
                   <span style={{
                     fontSize: 9, padding: '1px 5px', borderRadius: 4,
-                    background: '#8b5cf622', color: '#8b5cf6', fontWeight: 700,
+                    background: '#bc8cff22', color: '#bc8cff', fontWeight: 700,
                   }}>ENH</span>
                 )}
                 {(c.baseline_impact || []).map((b: string) => (
                   <span key={b} style={{
                     fontSize: 9, padding: '1px 5px', borderRadius: 4,
-                    background: `${BASELINE_COLORS[b] ?? '#6b7280'}22`,
-                    color: BASELINE_COLORS[b] ?? '#6b7280', fontWeight: 700,
+                    background: `${BASELINE_COLORS[b] ?? '#8b949e'}22`,
+                    color: BASELINE_COLORS[b] ?? '#8b949e', fontWeight: 700,
                   }}>{b[0]}</span>
                 ))}
               </div>
@@ -242,8 +242,8 @@ function Controls80053Panel() {
                 {selectedControl.baseline_impact.map((b: string) => (
                   <span key={b} style={{
                     fontSize: 10, padding: '2px 8px', borderRadius: 10,
-                    background: `${BASELINE_COLORS[b] ?? '#6b7280'}22`,
-                    color: BASELINE_COLORS[b] ?? '#6b7280', fontWeight: 700,
+                    background: `${BASELINE_COLORS[b] ?? '#8b949e'}22`,
+                    color: BASELINE_COLORS[b] ?? '#8b949e', fontWeight: 700,
                   }}>{b}</span>
                 ))}
               </div>
@@ -256,7 +256,7 @@ function Controls80053Panel() {
           )}
           {(selectedControl.related || []).length > 0 && (
             <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 11, color: '#4a5568', fontWeight: 600, marginBottom: 6 }}>RELATED CONTROLS</div>
+              <div style={{ fontSize: 11, color: '#6e7681', fontWeight: 600, marginBottom: 6 }}>RELATED CONTROLS</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                 {selectedControl.related.map((r: string) => (
                   <span key={r} style={{
@@ -290,18 +290,18 @@ function ControlTaggedObjects({ controlId }: { controlId: string }) {
     <div style={{ marginTop: 20, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
       {rules && rules.length > 0 && (
         <>
-          <div style={{ fontSize: 11, color: '#4a5568', fontWeight: 600, marginBottom: 8 }}>TAGGED RULES ({rules.length})</div>
+          <div style={{ fontSize: 11, color: '#6e7681', fontWeight: 600, marginBottom: 8 }}>TAGGED RULES ({rules.length})</div>
           {rules.map((r: any) => (
             <div key={r.id} style={{ fontSize: 12, padding: '4px 8px', marginBottom: 4, background: 'var(--bg-secondary)', borderRadius: 4 }}>
               <span style={{ color: 'var(--text-primary)' }}>{r.name}</span>
-              <span style={{ color: '#4a5568', marginLeft: 8 }}>{r.rule_type}</span>
+              <span style={{ color: '#6e7681', marginLeft: 8 }}>{r.rule_type}</span>
             </div>
           ))}
         </>
       )}
       {cases && cases.length > 0 && (
         <div style={{ marginTop: rules?.length ? 12 : 0 }}>
-          <div style={{ fontSize: 11, color: '#4a5568', fontWeight: 600, marginBottom: 8 }}>TAGGED CASES ({cases.length})</div>
+          <div style={{ fontSize: 11, color: '#6e7681', fontWeight: 600, marginBottom: 8 }}>TAGGED CASES ({cases.length})</div>
           {cases.map((c: any) => (
             <div key={c.id} style={{ fontSize: 12, padding: '4px 8px', marginBottom: 4, background: 'var(--bg-secondary)', borderRadius: 4 }}>
               {c.title}
@@ -354,9 +354,9 @@ function CSF20Panel() {
     <div style={{ display: 'flex', gap: 0, height: 'calc(100vh - 260px)', overflow: 'hidden' }}>
       {/* Functions column */}
       <div style={{ width: 160, flexShrink: 0, borderRight: '1px solid var(--border)', overflowY: 'auto' }}>
-        <div style={{ padding: '8px 12px', fontSize: 10, color: '#4a5568', fontWeight: 700, letterSpacing: 1 }}>FUNCTIONS</div>
+        <div style={{ padding: '8px 12px', fontSize: 10, color: '#6e7681', fontWeight: 700, letterSpacing: 1 }}>FUNCTIONS</div>
         {functions.map((f: any) => {
-          const color = FUNCTION_COLORS[f.function_id] ?? '#6b7280'
+          const color = FUNCTION_COLORS[f.function_id] ?? '#8b949e'
           const active = selectedFunction === f.function_id
           return (
             <button
@@ -380,9 +380,9 @@ function CSF20Panel() {
 
       {/* Categories column */}
       <div style={{ width: 240, flexShrink: 0, borderRight: '1px solid var(--border)', overflowY: 'auto' }}>
-        <div style={{ padding: '8px 12px', fontSize: 10, color: '#4a5568', fontWeight: 700, letterSpacing: 1 }}>CATEGORIES</div>
+        <div style={{ padding: '8px 12px', fontSize: 10, color: '#6e7681', fontWeight: 700, letterSpacing: 1 }}>CATEGORIES</div>
         {visibleCategories.map((cat: any) => {
-          const color = FUNCTION_COLORS[cat.function_id] ?? '#6b7280'
+          const color = FUNCTION_COLORS[cat.function_id] ?? '#8b949e'
           const active = selectedCategory === cat.element_id
           return (
             <button
@@ -403,20 +403,20 @@ function CSF20Panel() {
           )
         })}
         {visibleCategories.length === 0 && (
-          <div style={{ padding: '12px', fontSize: 12, color: '#4a5568' }}>Select a function</div>
+          <div style={{ padding: '12px', fontSize: 12, color: '#6e7681' }}>Select a function</div>
         )}
       </div>
 
       {/* Subcategories */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 16px' }}>
-        <div style={{ padding: '8px 0 12px', fontSize: 10, color: '#4a5568', fontWeight: 700, letterSpacing: 1 }}>SUBCATEGORIES</div>
+        <div style={{ padding: '8px 0 12px', fontSize: 10, color: '#6e7681', fontWeight: 700, letterSpacing: 1 }}>SUBCATEGORIES</div>
         {visibleSubcats.length === 0 && (
-          <div style={{ fontSize: 12, color: '#4a5568' }}>
+          <div style={{ fontSize: 12, color: '#6e7681' }}>
             {selectedFunction ? 'Select a category to see subcategories' : 'Select a function to begin'}
           </div>
         )}
         {visibleSubcats.map((sub: any) => {
-          const color = FUNCTION_COLORS[sub.function_id] ?? '#6b7280'
+          const color = FUNCTION_COLORS[sub.function_id] ?? '#8b949e'
           return (
             <div
               key={sub.element_id}

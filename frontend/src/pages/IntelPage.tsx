@@ -17,7 +17,7 @@ const TLP_COLORS: Record<string, { bg: string; text: string }> = {
 
 function TLPBadge({ tlp }: { tlp?: string }) {
   if (!tlp) return null
-  const c = TLP_COLORS[tlp] || { bg: '#1e293b', text: '#94a3b8' }
+  const c = TLP_COLORS[tlp] || { bg: '#1e293b', text: '#8b949e' }
   return (
     <span style={{
       fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 700,
@@ -137,7 +137,7 @@ export default function IntelPage() {
             </thead>
             <tbody>
               {(data?.objects || []).map((obj: any) => (
-                <tr key={obj.id} style={{ borderBottom: '1px solid #1a2030' }}>
+                <tr key={obj.id} style={{ borderBottom: '1px solid #161b22' }}>
                   <td style={{ padding: '10px 12px' }}>
                     <TypeBadge type={obj.type} />
                   </td>
@@ -153,7 +153,7 @@ export default function IntelPage() {
                     {(obj.labels || []).slice(0, 2).map((l: string) => (
                       <span key={l} style={{
                         fontSize: 10, padding: '2px 6px', borderRadius: 8, marginRight: 4,
-                        background: '#1e3a5f', color: '#60a5fa',
+                        background: '#1c2128', color: '#58a6ff',
                       }}>
                         {l}
                       </span>
@@ -186,16 +186,16 @@ export default function IntelPage() {
 
 function TypeBadge({ type }: { type: string }) {
   const colors: Record<string, string> = {
-    'threat-actor': '#ef4444',
-    'intrusion-set': '#f97316',
-    'malware': '#a855f7',
-    'indicator': '#3b82f6',
-    'vulnerability': '#f59e0b',
-    'attack-pattern': '#06b6d4',
+    'threat-actor': '#f85149',
+    'intrusion-set': '#e3873a',
+    'malware': '#bc8cff',
+    'indicator': '#58a6ff',
+    'vulnerability': '#d29922',
+    'attack-pattern': '#388bfd',
     'campaign': '#ec4899',
-    'tool': '#10b981',
+    'tool': '#3fb950',
   }
-  const color = colors[type] || '#6b7280'
+  const color = colors[type] || '#8b949e'
   return (
     <span style={{
       fontSize: 10, padding: '2px 7px', borderRadius: 8,

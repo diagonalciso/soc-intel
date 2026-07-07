@@ -106,10 +106,10 @@ export default function SettingsPage() {
         {/* Show newly created key */}
         {createdKey && (
           <div style={{
-            background: 'rgba(16,185,129,0.1)', border: '1px solid #10b981',
+            background: 'rgba(16,185,129,0.1)', border: '1px solid #3fb950',
             borderRadius: 4, padding: '10px 12px', marginBottom: 14, fontSize: 12,
           }}>
-            <div style={{ color: '#10b981', fontWeight: 600, marginBottom: 4 }}>
+            <div style={{ color: '#3fb950', fontWeight: 600, marginBottom: 4 }}>
               Key created — copy it now, it won't be shown again:
             </div>
             <div style={{ fontFamily: 'monospace', wordBreak: 'break-all', fontSize: 11, color: 'var(--text-primary)' }}>
@@ -162,7 +162,7 @@ export default function SettingsPage() {
                       onClick={() => {
                         if (confirm('Revoke this API key?')) revokeKeyMut.mutate(k.id)
                       }}
-                      style={{ background: 'transparent', color: '#ef4444', border: '1px solid #ef4444', borderRadius: 3, padding: '3px 8px', fontSize: 11, cursor: 'pointer' }}
+                      style={{ background: 'transparent', color: '#f85149', border: '1px solid #f85149', borderRadius: 3, padding: '3px 8px', fontSize: 11, cursor: 'pointer' }}
                     >
                       Revoke
                     </button>

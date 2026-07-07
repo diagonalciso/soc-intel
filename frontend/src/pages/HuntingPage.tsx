@@ -14,17 +14,17 @@ const TLP_COLORS: Record<string, { bg: string; text: string }> = {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  indicator: '#3b82f6',
-  'threat-actor': '#ef4444',
-  malware: '#f59e0b',
-  vulnerability: '#8b5cf6',
-  'attack-pattern': '#10b981',
-  campaign: '#06b6d4',
+  indicator: '#58a6ff',
+  'threat-actor': '#f85149',
+  malware: '#d29922',
+  vulnerability: '#bc8cff',
+  'attack-pattern': '#3fb950',
+  campaign: '#388bfd',
 }
 
 function TLPBadge({ tlp }: { tlp?: string }) {
   if (!tlp) return null
-  const c = TLP_COLORS[tlp] || { bg: '#1e293b', text: '#94a3b8' }
+  const c = TLP_COLORS[tlp] || { bg: '#1e293b', text: '#8b949e' }
   return (
     <span style={{
       fontSize: 9, padding: '2px 6px', borderRadius: 4, fontWeight: 700,
@@ -76,7 +76,7 @@ function PivotTab() {
             onChange={(e) => setSearchInput(e.target.value)}
             style={{
               flex: 1, padding: '10px 14px', border: '1px solid var(--border)',
-              borderRadius: 6, background: 'var(--bg-secondary)', color: '#e2e8f0',
+              borderRadius: 6, background: 'var(--bg-secondary)', color: '#e6edf3',
               fontSize: 13,
             }}
           />
@@ -99,25 +99,25 @@ function PivotTab() {
           {/* Summary cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
             <div style={{ padding: 16, background: 'var(--bg-secondary)', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#3b82f6' }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#58a6ff' }}>
                 {results.stix_objects?.length || 0}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>IOC Matches</div>
             </div>
             <div style={{ padding: 16, background: 'var(--bg-secondary)', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#f59e0b' }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#d29922' }}>
                 {results.threat_actors?.length || 0}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>Threat Actors</div>
             </div>
             <div style={{ padding: 16, background: 'var(--bg-secondary)', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#10b981' }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#3fb950' }}>
                 {results.sigma_rules?.length || 0}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>Sigma Rules</div>
             </div>
             <div style={{ padding: 16, background: 'var(--bg-secondary)', borderRadius: 8 }}>
-              <div style={{ fontSize: 24, fontWeight: 700, color: '#8b5cf6' }}>
+              <div style={{ fontSize: 24, fontWeight: 700, color: '#bc8cff' }}>
                 {results.yara_rules?.length || 0}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>YARA Rules</div>
@@ -176,7 +176,7 @@ function PivotTab() {
                       <td style={{ padding: '8px 12px' }}>
                         <span style={{
                           fontSize: 11, padding: '2px 8px', borderRadius: 3, fontWeight: 600,
-                          background: rule.severity === 'high' ? '#dc2626' : '#f59e0b',
+                          background: rule.severity === 'high' ? '#ff4444' : '#d29922',
                           color: '#fff',
                         }}>
                           {rule.severity}
@@ -211,7 +211,7 @@ function PivotTab() {
                       <td style={{ padding: '8px 12px' }}>
                         <span style={{
                           fontSize: 11, padding: '2px 8px', borderRadius: 3, fontWeight: 600,
-                          background: rule.severity === 'high' ? '#dc2626' : '#f59e0b',
+                          background: rule.severity === 'high' ? '#ff4444' : '#d29922',
                           color: '#fff',
                         }}>
                           {rule.severity}
@@ -254,7 +254,7 @@ function MalwareFamiliesTab() {
           }}
           style={{
             width: '100%', padding: '10px 14px', border: '1px solid var(--border)',
-            borderRadius: 6, background: 'var(--bg-secondary)', color: '#e2e8f0',
+            borderRadius: 6, background: 'var(--bg-secondary)', color: '#e6edf3',
             fontSize: 13,
           }}
         />
@@ -340,7 +340,7 @@ function YARATab() {
           }}
           style={{
             width: '100%', padding: '10px 14px', border: '1px solid var(--border)',
-            borderRadius: 6, background: 'var(--bg-secondary)', color: '#e2e8f0',
+            borderRadius: 6, background: 'var(--bg-secondary)', color: '#e6edf3',
             fontSize: 13,
           }}
         />
@@ -363,7 +363,7 @@ function YARATab() {
                 <td style={{ padding: '8px 12px' }}>
                   <span style={{
                     fontSize: 11, padding: '2px 8px', borderRadius: 3, fontWeight: 600,
-                    background: rule.severity === 'high' ? '#dc2626' : rule.severity === 'critical' ? '#991b1b' : '#f59e0b',
+                    background: rule.severity === 'high' ? '#ff4444' : rule.severity === 'critical' ? '#991b1b' : '#d29922',
                     color: '#fff',
                   }}>
                     {rule.severity || 'medium'}

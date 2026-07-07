@@ -24,18 +24,18 @@ interface Rule {
 }
 
 const TYPE_COLORS: Record<RuleType, string> = {
-  yara:         '#f59e0b',
-  sigma:        '#3b82f6',
-  snort:        '#ef4444',
-  suricata:     '#8b5cf6',
-  'stix-pattern': '#10b981',
+  yara:         '#d29922',
+  sigma:        '#58a6ff',
+  snort:        '#f85149',
+  suricata:     '#bc8cff',
+  'stix-pattern': '#3fb950',
 }
 
 const SEV_COLORS: Record<RuleSeverity, string> = {
-  low:      '#10b981',
-  medium:   '#f59e0b',
-  high:     '#f97316',
-  critical: '#ef4444',
+  low:      '#3fb950',
+  medium:   '#d29922',
+  high:     '#e3873a',
+  critical: '#f85149',
 }
 
 const EMPTY_FORM = {
@@ -175,8 +175,8 @@ export default function RulesPage() {
               <div key={t} style={{
                 padding: '4px 10px', borderRadius: 12, fontSize: 11,
                 background: `${TYPE_COLORS[t as RuleType]}18`,
-                color: TYPE_COLORS[t as RuleType] || '#94a3b8',
-                border: `1px solid ${TYPE_COLORS[t as RuleType] || '#94a3b8'}40`,
+                color: TYPE_COLORS[t as RuleType] || '#8b949e',
+                border: `1px solid ${TYPE_COLORS[t as RuleType] || '#8b949e'}40`,
               }}>
                 {t.toUpperCase()} {String(n)}
               </div>
@@ -275,13 +275,13 @@ export default function RulesPage() {
                       background: rule.status === 'active'
                         ? 'rgba(16,185,129,0.1)' : rule.status === 'testing'
                         ? 'rgba(245,158,11,0.1)' : 'rgba(148,163,184,0.1)',
-                      color: rule.status === 'active' ? '#10b981'
-                        : rule.status === 'testing' ? '#f59e0b' : '#94a3b8',
+                      color: rule.status === 'active' ? '#3fb950'
+                        : rule.status === 'testing' ? '#d29922' : '#8b949e',
                     }}>
                       {rule.status}
                     </span>
                   </td>
-                  <td style={{ padding: '8px 8px', fontSize: 11, color: '#f59e0b', fontFamily: 'monospace' }}>
+                  <td style={{ padding: '8px 8px', fontSize: 11, color: '#d29922', fontFamily: 'monospace' }}>
                     {(rule.mitre_techniques || []).slice(0, 3).join(' ')}
                     {(rule.mitre_techniques || []).length > 3 && ` +${rule.mitre_techniques.length - 3}`}
                   </td>
@@ -289,7 +289,7 @@ export default function RulesPage() {
                     <button onClick={() => openEdit(rule)} style={btnSmall}>Edit</button>
                     <button
                       onClick={() => { if (confirm('Delete this rule?')) deleteMut.mutate(rule.id) }}
-                      style={{ ...btnSmall, color: '#ef4444', marginLeft: 4 }}
+                      style={{ ...btnSmall, color: '#f85149', marginLeft: 4 }}
                     >
                       Del
                     </button>
@@ -487,7 +487,7 @@ const selectStyle: React.CSSProperties = {
 const btnPrimary: React.CSSProperties = {
   padding: '7px 16px', background: 'rgba(59,130,246,0.15)',
   border: '1px solid rgba(59,130,246,0.4)', borderRadius: 5,
-  color: '#60a5fa', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+  color: '#58a6ff', cursor: 'pointer', fontSize: 12, fontWeight: 500,
 }
 
 const btnSecondary: React.CSSProperties = {

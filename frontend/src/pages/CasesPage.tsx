@@ -31,11 +31,11 @@ export default function CasesPage() {
   })
 
   const severityColors: Record<string, string> = {
-    critical: '#dc2626', high: '#ef4444', medium: '#f59e0b', low: '#10b981',
+    critical: '#ff4444', high: '#f85149', medium: '#d29922', low: '#3fb950',
   }
   const statusColors: Record<string, string> = {
-    open: '#3b82f6', in_progress: '#f59e0b', resolved: '#10b981',
-    closed: '#6b7280', pending: '#a855f7',
+    open: '#58a6ff', in_progress: '#d29922', resolved: '#3fb950',
+    closed: '#8b949e', pending: '#bc8cff',
   }
 
   return (
@@ -139,20 +139,20 @@ export default function CasesPage() {
           </thead>
           <tbody>
             {(data || []).map((c: any) => (
-              <tr key={c.id} style={{ borderBottom: '1px solid #1a2030' }}>
+              <tr key={c.id} style={{ borderBottom: '1px solid #161b22' }}>
                 <td style={{ padding: '10px 12px', fontSize: 13, fontWeight: 500 }}>{c.title}</td>
                 <td style={{ padding: '10px 12px' }}>
-                  <Badge label={c.severity} color={severityColors[c.severity] || '#6b7280'} />
+                  <Badge label={c.severity} color={severityColors[c.severity] || '#8b949e'} />
                 </td>
                 <td style={{ padding: '10px 12px' }}>
-                  <Badge label={c.status} color={statusColors[c.status] || '#6b7280'} />
+                  <Badge label={c.status} color={statusColors[c.status] || '#8b949e'} />
                 </td>
                 <td style={{ padding: '10px 12px', fontSize: 11, color: 'var(--text-secondary)' }}>{c.tlp}</td>
                 <td style={{ padding: '10px 12px', fontSize: 11 }}>
                   {(c.tags || []).map((t: string) => (
                     <span key={t} style={{
                       fontSize: 10, padding: '2px 6px', marginRight: 4,
-                      background: '#1e3a5f', color: '#60a5fa', borderRadius: 8,
+                      background: '#1c2128', color: '#58a6ff', borderRadius: 8,
                     }}>{t}</span>
                   ))}
                 </td>

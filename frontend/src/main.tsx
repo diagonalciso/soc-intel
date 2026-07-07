@@ -24,7 +24,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Toaster
           position="top-right"
           toastOptions={{
-            style: { background: '#1e2533', color: '#e2e8f0', border: '1px solid #2d3748' },
+            style: { background: '#1c2128', color: '#e6edf3', border: '1px solid #30363d' },
           }}
         />
       </QueryClientProvider>

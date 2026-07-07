@@ -15,10 +15,10 @@ export default function ConnectorsPage() {
   })
 
   const typeColors: Record<string, string> = {
-    import_external: '#3b82f6',
-    enrichment: '#10b981',
-    stream: '#8b5cf6',
-    export: '#f59e0b',
+    import_external: '#58a6ff',
+    enrichment: '#3fb950',
+    stream: '#bc8cff',
+    export: '#d29922',
   }
 
   return (
@@ -36,7 +36,7 @@ export default function ConnectorsPage() {
             <div key={c.name} style={{
               background: 'var(--bg-secondary)',
               border: '1px solid var(--border)',
-              borderLeft: `3px solid ${typeColors[c.type] || '#6b7280'}`,
+              borderLeft: `3px solid ${typeColors[c.type] || '#8b949e'}`,
               borderRadius: 6,
               padding: 16,
             }}>
@@ -45,7 +45,7 @@ export default function ConnectorsPage() {
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{c.display_name}</div>
                   <span style={{
                     fontSize: 10, padding: '2px 7px', borderRadius: 8, marginTop: 4, display: 'inline-block',
-                    background: `${typeColors[c.type] || '#6b7280'}22`, color: typeColors[c.type] || '#6b7280',
+                    background: `${typeColors[c.type] || '#8b949e'}22`, color: typeColors[c.type] || '#8b949e',
                   }}>
                     {c.type}
                   </span>
@@ -64,7 +64,7 @@ export default function ConnectorsPage() {
               <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '8px 0', lineHeight: 1.5 }}>
                 {c.description}
               </p>
-              <div style={{ fontSize: 11, color: '#4a5568', marginTop: 8 }}>
+              <div style={{ fontSize: 11, color: '#6e7681', marginTop: 8 }}>
                 Schedule: <code style={{ color: 'var(--text-secondary)' }}>{c.schedule}</code>
               </div>
             </div>

@@ -23,16 +23,16 @@ interface ThreatActor {
 }
 
 const SOPHISTICATION_COLOR: Record<string, string> = {
-  none:        '#6b7280',
-  minimal:     '#6b7280',
-  intermediate:'#f59e0b',
-  advanced:    '#f97316',
-  expert:      '#ef4444',
-  innovator:   '#dc2626',
+  none:        '#8b949e',
+  minimal:     '#8b949e',
+  intermediate:'#d29922',
+  advanced:    '#e3873a',
+  expert:      '#f85149',
+  innovator:   '#ff4444',
   strategic:   '#b91c1c',
 }
 
-const SEV_COLOR = (s: string) => SOPHISTICATION_COLOR[s?.toLowerCase()] || '#6b7280'
+const SEV_COLOR = (s: string) => SOPHISTICATION_COLOR[s?.toLowerCase()] || '#8b949e'
 
 export default function ThreatActorsPage() {
   const nav = useNavigate()
@@ -120,7 +120,7 @@ function ActorCard({ actor, onClick }: { actor: ThreatActor; onClick: () => void
         </div>
         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', flexShrink: 0 }}>
           {types.slice(0, 2).map((t) => (
-            <span key={t} style={tagStyle('#3b82f6')}>{t.replace('-', ' ')}</span>
+            <span key={t} style={tagStyle('#58a6ff')}>{t.replace('-', ' ')}</span>
           ))}
         </div>
       </div>
@@ -146,15 +146,15 @@ function ActorCard({ actor, onClick }: { actor: ThreatActor; onClick: () => void
           <span style={tagStyle(sophColor)}>sophistication: {soph}</span>
         )}
         {actor.primary_motivation && (
-          <span style={tagStyle('#8b5cf6')}>{actor.primary_motivation}</span>
+          <span style={tagStyle('#bc8cff')}>{actor.primary_motivation}</span>
         )}
         {actor.resource_level && (
-          <span style={tagStyle('#6b7280')}>{actor.resource_level}</span>
+          <span style={tagStyle('#8b949e')}>{actor.resource_level}</span>
         )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-        <div style={{ fontSize: 10, color: '#4a5568' }}>
+        <div style={{ fontSize: 10, color: '#6e7681' }}>
           {actor.x_clawint_source || 'unknown source'}
         </div>
         {actor.confidence != null && (

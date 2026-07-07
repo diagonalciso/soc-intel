@@ -102,8 +102,8 @@ export default function AttackPage() {
               <div key={tactic.id} style={{ width: 110, flexShrink: 0 }}>
                 {/* Tactic header */}
                 <div style={{
-                  background: '#1e3a5f',
-                  color: '#60a5fa',
+                  background: '#1c2128',
+                  color: '#58a6ff',
                   padding: '6px 6px',
                   fontSize: 10,
                   fontWeight: 700,
@@ -158,7 +158,7 @@ export default function AttackPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
             <div>
               <div style={{
-                fontSize: 10, color: '#f59e0b', fontFamily: 'monospace',
+                fontSize: 10, color: '#d29922', fontFamily: 'monospace',
                 marginBottom: 4,
               }}>
                 {_techniqueId(selected)}
@@ -177,7 +177,7 @@ export default function AttackPage() {
           {selected.x_mitre_is_subtechnique && (
             <div style={{
               fontSize: 10, padding: '2px 8px', borderRadius: 8,
-              background: 'rgba(245,158,11,0.1)', color: '#f59e0b',
+              background: 'rgba(245,158,11,0.1)', color: '#d29922',
               display: 'inline-block', marginBottom: 10,
             }}>
               Sub-technique
@@ -260,7 +260,7 @@ function TechCell({ tech, isSelected, onClick }: {
             ? 'rgba(245,158,11,0.18)'
             : '#1e4d2b',
         border: isSelected
-          ? '1px solid #3b82f6'
+          ? '1px solid #58a6ff'
           : '1px solid transparent',
         color: isSelected ? '#93c5fd' : isSub ? '#fcd34d' : '#6ee7b7',
         transition: 'all 0.1s',

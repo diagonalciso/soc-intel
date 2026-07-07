@@ -34,7 +34,7 @@ interface ConditionMeta {
 }
 
 const SEV_COLORS: Record<Severity, string> = {
-  low: '#10b981', medium: '#f59e0b', high: '#f97316', critical: '#ef4444',
+  low: '#3fb950', medium: '#d29922', high: '#e3873a', critical: '#f85149',
 }
 
 const EMPTY_FORM = {
@@ -187,9 +187,9 @@ export default function AlertRulesPage() {
           })}
           <div style={{
             background: 'var(--bg-secondary)', border: '1px solid var(--border)',
-            borderLeft: '3px solid #10b981', borderRadius: 4, padding: '6px 12px',
+            borderLeft: '3px solid #3fb950', borderRadius: 4, padding: '6px 12px',
           }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#10b981' }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#3fb950' }}>
               {rules.filter((r) => r.enabled).length}
             </div>
             <div style={{ fontSize: 10, color: 'var(--text-secondary)' }}>enabled</div>
@@ -228,7 +228,7 @@ export default function AlertRulesPage() {
                   <td style={{ padding: '10px 12px', color: 'var(--text-secondary)' }}>
                     {r.condition_type.replace(/_/g, ' ')}
                     {Object.keys(r.condition_params || {}).length > 0 && (
-                      <div style={{ fontSize: 10, color: '#4a5568', marginTop: 2 }}>
+                      <div style={{ fontSize: 10, color: '#6e7681', marginTop: 2 }}>
                         {Object.entries(r.condition_params).map(([k, v]) => `${k}=${v}`).join(', ')}
                       </div>
                     )}
@@ -241,7 +241,7 @@ export default function AlertRulesPage() {
                       {r.severity}
                     </span>
                   </td>
-                  <td style={{ padding: '10px 12px', color: r.matched_count > 0 ? '#10b981' : 'var(--text-secondary)' }}>
+                  <td style={{ padding: '10px 12px', color: r.matched_count > 0 ? '#3fb950' : 'var(--text-secondary)' }}>
                     {r.matched_count}
                   </td>
                   <td style={{ padding: '10px 12px', color: 'var(--text-secondary)', fontSize: 11 }}>
@@ -252,7 +252,7 @@ export default function AlertRulesPage() {
                       onClick={() => toggleMut.mutate({ id: r.id, enabled: !r.enabled })}
                       style={{
                         background: r.enabled ? 'rgba(16,185,129,0.15)' : 'rgba(107,114,128,0.15)',
-                        color: r.enabled ? '#10b981' : '#6b7280',
+                        color: r.enabled ? '#3fb950' : '#8b949e',
                         border: 'none', borderRadius: 10, padding: '2px 8px', fontSize: 10, cursor: 'pointer',
                       }}
                     >
@@ -266,7 +266,7 @@ export default function AlertRulesPage() {
                         onClick={() => {
                           if (confirm('Delete this rule?')) deleteMut.mutate(r.id)
                         }}
-                        style={{ ...actionBtnStyle, color: '#ef4444' }}
+                        style={{ ...actionBtnStyle, color: '#f85149' }}
                       >
                         del
                       </button>

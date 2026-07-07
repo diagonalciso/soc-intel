@@ -127,7 +127,7 @@ export default function Layout() {
           })}
         </div>
 
-        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', fontSize: 11, color: '#4a5568' }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', fontSize: 11, color: '#6e7681' }}>
           local network mode
         </div>
       </nav>

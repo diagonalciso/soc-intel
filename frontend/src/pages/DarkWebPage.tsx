@@ -74,19 +74,19 @@ export default function DarkWebPage() {
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         <div style={statCard}>
-          <div style={{ fontSize: 26, fontWeight: 700, color: '#ef4444' }}>{stats?.total ?? '—'}</div>
+          <div style={{ fontSize: 26, fontWeight: 700, color: '#f85149' }}>{stats?.total ?? '—'}</div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Ransomware Victims</div>
         </div>
         <div style={{ ...statCard, gridColumn: 'span 2' }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Top Victim Countries</div>
           <ResponsiveContainer width="100%" height={100}>
             <BarChart data={byCountry}>
-              <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 10 }} />
+              <XAxis dataKey="name" tick={{ fill: '#8b949e', fontSize: 10 }} />
               <YAxis hide />
               <Tooltip
-                contentStyle={{ background: '#1e2533', border: '1px solid #2d3748', color: '#e2e8f0' }}
+                contentStyle={{ background: '#1c2128', border: '1px solid #30363d', color: '#e6edf3' }}
               />
-              <Bar dataKey="count" fill="#ef4444" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="count" fill="#f85149" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -182,7 +182,7 @@ function RansomwareTable({ data }: { data: any[] }) {
       </thead>
       <tbody>
         {data.map((row, i) => (
-          <tr key={i} style={{ borderBottom: '1px solid #1a2030' }}>
+          <tr key={i} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={tdStyle}><GroupBadge name={row.group_name} /></td>
             <td style={tdStyle}>{row.victim_name}</td>
             <td style={{ ...tdStyle, color: 'var(--accent)' }}>{row.victim_domain}</td>
@@ -191,7 +191,7 @@ function RansomwareTable({ data }: { data: any[] }) {
             <td style={tdStyle}>{row.date_posted?.slice(0, 10) || '—'}</td>
             <td style={tdStyle}>
               {row.files_published ? (
-                <span style={{ color: '#ef4444', fontSize: 11 }}>Published</span>
+                <span style={{ color: '#f85149', fontSize: 11 }}>Published</span>
               ) : '—'}
             </td>
           </tr>
@@ -214,7 +214,7 @@ function CredentialsTable({ data }: { data: any[] }) {
       </thead>
       <tbody>
         {data.map((row, i) => (
-          <tr key={i} style={{ borderBottom: '1px solid #1a2030' }}>
+          <tr key={i} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={tdStyle}>{row.victim_name || row.email || row.domain || '—'}</td>
             <td style={tdStyle}>{row.exposure_type}</td>
             <td style={tdStyle}>
@@ -247,7 +247,7 @@ function IABTable({ data }: { data: any[] }) {
       </thead>
       <tbody>
         {data.map((row, i) => (
-          <tr key={i} style={{ borderBottom: '1px solid #1a2030' }}>
+          <tr key={i} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={tdStyle}><code style={{ fontSize: 11 }}>{row.access_type}</code></td>
             <td style={tdStyle}>{row.target_sector || '—'}</td>
             <td style={tdStyle}>{row.target_country || '—'}</td>
@@ -276,7 +276,7 @@ function StealerTable({ data }: { data: any[] }) {
       </thead>
       <tbody>
         {data.map((row, i) => (
-          <tr key={i} style={{ borderBottom: '1px solid #1a2030' }}>
+          <tr key={i} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={tdStyle}><GroupBadge name={row.malware_family} /></td>
             <td style={tdStyle}>{row.credentials_count?.toLocaleString() || '—'}</td>
             <td style={tdStyle}>{(row.domains || []).slice(0, 3).join(', ')}{(row.domains?.length || 0) > 3 ? '...' : ''}</td>
@@ -301,7 +301,7 @@ function HoneypotTable({ ips }: { ips: string[] }) {
       </thead>
       <tbody>
         {ips.map((ip, i) => (
-          <tr key={ip} style={{ borderBottom: '1px solid #1a2030' }}>
+          <tr key={ip} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={{ ...tdStyle, color: 'var(--text-secondary)', width: 48 }}>{i + 1}</td>
             <td style={tdStyle}>
               <a
@@ -333,7 +333,7 @@ function CTIReportsTable({ data }: { data: any[] }) {
       </thead>
       <tbody>
         {data.map((row, i) => (
-          <tr key={i} style={{ borderBottom: '1px solid #1a2030' }}>
+          <tr key={i} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={tdStyle}><GroupBadge name={row.source} /></td>
             <td style={tdStyle}>
               {row.url ? (
@@ -376,7 +376,7 @@ function TelegramTable({ data }: { data: any[] }) {
       </thead>
       <tbody>
         {data.map((row, i) => (
-          <tr key={i} style={{ borderBottom: '1px solid #1a2030' }}>
+          <tr key={i} style={{ borderBottom: '1px solid #161b22' }}>
             <td style={tdStyle}><GroupBadge name={row.channel_title || row.channel} /></td>
             <td style={{ ...tdStyle, maxWidth: 400 }}>
               {row.message_url ? (
@@ -399,7 +399,7 @@ function TelegramTable({ data }: { data: any[] }) {
 }
 
 function GroupBadge({ name }: { name: string }) {
-  const colors = ['#ef4444', '#f97316', '#f59e0b', '#8b5cf6', '#06b6d4', '#10b981']
+  const colors = ['#f85149', '#e3873a', '#d29922', '#bc8cff', '#388bfd', '#3fb950']
   const color = colors[Math.abs(name?.charCodeAt(0) || 0) % colors.length]
   return (
     <span style={{

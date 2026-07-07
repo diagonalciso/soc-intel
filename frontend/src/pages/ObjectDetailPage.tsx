@@ -5,22 +5,22 @@ import CytoscapeComponent from 'react-cytoscapejs'
 import { getObject, getObjectRelationships, getObjectGraph, getSightings, createSighting } from '../api/client'
 
 const NODE_COLORS: Record<string, string> = {
-  'threat-actor':    '#ef4444',
-  'intrusion-set':  '#f97316',
-  'campaign':       '#f59e0b',
-  'malware':        '#a855f7',
-  'tool':           '#8b5cf6',
-  'attack-pattern': '#3b82f6',
-  'vulnerability':  '#06b6d4',
-  'indicator':      '#10b981',
+  'threat-actor':    '#f85149',
+  'intrusion-set':  '#e3873a',
+  'campaign':       '#d29922',
+  'malware':        '#bc8cff',
+  'tool':           '#bc8cff',
+  'attack-pattern': '#58a6ff',
+  'vulnerability':  '#388bfd',
+  'indicator':      '#3fb950',
   'infrastructure': '#6366f1',
   'identity':       '#ec4899',
   'report':         '#84cc16',
 }
 
 function nodeColor(type: string, isRoot: boolean): string {
-  if (isRoot) return '#3b82f6'
-  return NODE_COLORS[type] || '#94a3b8'
+  if (isRoot) return '#58a6ff'
+  return NODE_COLORS[type] || '#8b949e'
 }
 
 const TLP_COLORS: Record<string, { bg: string; text: string }> = {
@@ -113,12 +113,12 @@ export default function ObjectDetailPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={{
           fontSize: 11, padding: '3px 9px', borderRadius: 8,
-          background: '#1e3a5f', color: '#60a5fa', fontFamily: 'monospace',
+          background: '#1c2128', color: '#58a6ff', fontFamily: 'monospace',
         }}>
           {obj.type}
         </span>
         {obj.tlp && (() => {
-          const c = TLP_COLORS[obj.tlp] || { bg: '#1e293b', text: '#94a3b8' }
+          const c = TLP_COLORS[obj.tlp] || { bg: '#1e293b', text: '#8b949e' }
           return (
             <span style={{
               fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 700,
@@ -145,7 +145,7 @@ export default function ObjectDetailPage() {
               style={{
                 padding: '6px 14px', fontSize: 12, fontWeight: 500,
                 background: sightMutation.isPending ? '#1e293b' : '#1d4ed8',
-                color: '#e2e8f0', border: 'none', borderRadius: 6, cursor: 'pointer',
+                color: '#e6edf3', border: 'none', borderRadius: 6, cursor: 'pointer',
               }}
             >
               {sightMutation.isPending ? 'Reporting…' : '+ Report Sighting'}
@@ -213,7 +213,7 @@ export default function ObjectDetailPage() {
                     style: {
                       'background-color': 'data(color)',
                       'label': 'data(label)',
-                      'color': '#e2e8f0',
+                      'color': '#e6edf3',
                       'font-size': 9,
                       'text-valign': 'bottom',
                       'text-halign': 'center',
@@ -221,7 +221,7 @@ export default function ObjectDetailPage() {
                       'width': 36,
                       'height': 36,
                       'border-width': 2,
-                      'border-color': '#1a2030',
+                      'border-color': '#161b22',
                       'text-max-width': 90,
                       'text-wrap': 'ellipsis',
                     },
@@ -245,14 +245,14 @@ export default function ObjectDetailPage() {
                       'curve-style': 'bezier',
                       'label': 'data(label)',
                       'font-size': 8,
-                      'color': '#6b7280',
+                      'color': '#8b949e',
                       'text-rotation': 'autorotate',
                     },
                   },
                   {
                     selector: 'node:selected',
                     style: {
-                      'border-color': '#60a5fa',
+                      'border-color': '#58a6ff',
                       'border-width': 3,
                     },
                   },
@@ -334,8 +334,8 @@ export default function ObjectDetailPage() {
                   </thead>
                   <tbody>
                     {(rels || []).map((rel: any) => (
-                      <tr key={rel.id} style={{ borderBottom: '1px solid #1a2030' }}>
-                        <td style={{ padding: '8px 8px', fontSize: 12, color: '#f59e0b' }}>
+                      <tr key={rel.id} style={{ borderBottom: '1px solid #161b22' }}>
+                        <td style={{ padding: '8px 8px', fontSize: 12, color: '#d29922' }}>
                           {rel.relationship_type}
                         </td>
                         <td

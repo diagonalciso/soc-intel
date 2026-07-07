@@ -90,7 +90,7 @@ function CampaignRow({ campaign, onClick }: { campaign: Campaign; onClick: () =>
       style={{
         background: 'var(--bg-primary)',
         border: '1px solid var(--border)',
-        borderLeft: '3px solid #8b5cf6',
+        borderLeft: '3px solid #bc8cff',
         borderRadius: 5,
         padding: '12px 14px',
         cursor: 'pointer',
@@ -122,7 +122,7 @@ function CampaignRow({ campaign, onClick }: { campaign: Campaign; onClick: () =>
         )}
 
         {campaign.objective && (
-          <div style={{ fontSize: 11, color: '#8b5cf6', marginTop: 4 }}>
+          <div style={{ fontSize: 11, color: '#bc8cff', marginTop: 4 }}>
             Objective: {campaign.objective}
           </div>
         )}
@@ -131,7 +131,7 @@ function CampaignRow({ campaign, onClick }: { campaign: Campaign; onClick: () =>
           {(campaign.labels || []).slice(0, 4).map((l) => (
             <span key={l} style={{
               fontSize: 9, padding: '2px 6px', borderRadius: 10,
-              background: 'rgba(139,92,246,0.15)', color: '#8b5cf6',
+              background: 'rgba(139,92,246,0.15)', color: '#bc8cff',
             }}>{l}</span>
           ))}
         </div>
@@ -153,7 +153,7 @@ function CampaignRow({ campaign, onClick }: { campaign: Campaign; onClick: () =>
             conf: {campaign.confidence}
           </div>
         )}
-        <div style={{ fontSize: 10, color: '#4a5568', marginTop: 4 }}>
+        <div style={{ fontSize: 10, color: '#6e7681', marginTop: 4 }}>
           {campaign.x_clawint_source || 'manual'}
         </div>
       </div>
