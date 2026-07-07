@@ -187,8 +187,10 @@ async def _match_high_epss(client, params: dict, since: str) -> list[dict]:
                 "bool": {
                     "must": [
                         {"term": {"type": "vulnerability"}},
-                        {"range": {"created": {"gte": since}}},
-                        {"range": {"x_clawint_epss_score": {"gte": epss_min}}},
+                        # EPSS vulns carry created = CVE publish date (decades old);
+                        # freshness of the *score* is tracked by modified (re-ingest bumps it).
+                        {"range": {"modified": {"gte": since}}},
+                        {"range": {"x_epss_score": {"gte": epss_min}}},
                     ]
                 }
             },
