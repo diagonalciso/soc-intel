@@ -11,6 +11,7 @@ from app.models.user import User
 from app.connectors.builtin.shodan_internetdb import ShodanInternetDBConnector
 from app.connectors.builtin.hybrid_analysis import HybridAnalysisConnector
 from app.connectors.builtin.crtsh import CrtShConnector
+from app.connectors.builtin.hudsonrock import HudsonRockConnector
 
 router = APIRouter(prefix="/enrich", tags=["enrichment"])
 
@@ -66,3 +67,26 @@ async def enrich_domain_crtsh(
     connector = CrtShConnector()
     objects = await connector.enrich_domain(domain)
     return {"domain": domain, "source": "crtsh", "objects": objects}
+
+
+@router.get("/hudsonrock/domain/{domain}", tags=["enrichment"])
+async def enrich_domain_hudsonrock(
+    domain: str,
+    user: User = Depends(get_current_user),
+):
+    """Look up infostealer credential exposure for a domain via Hudson Rock Cavalier
+    (free community API; paid if HUDSONROCK_API_KEY set)."""
+    connector = HudsonRockConnector()
+    result = await connector.enrich_domain(domain)
+    return {"domain": domain, "source": "hudsonrock", "result": result}
+
+
+@router.get("/hudsonrock/email/{email}", tags=["enrichment"])
+async def enrich_email_hudsonrock(
+    email: str,
+    user: User = Depends(get_current_user),
+):
+    """Look up infostealer credential exposure for an email/username via Hudson Rock Cavalier."""
+    connector = HudsonRockConnector()
+    result = await connector.enrich_email(email)
+    return {"email": email, "source": "hudsonrock", "result": result}

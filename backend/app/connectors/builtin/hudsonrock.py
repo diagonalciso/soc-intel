@@ -54,26 +54,43 @@ class HudsonRockConnector(BaseConnector):
             self.logger.error(f"HudsonRock enrich domain {domain}: {e}")
             return None
 
-        employees = data.get("employees") or []
-        users = data.get("users") or []
-        total_employees = data.get("total_corporate_credentials") or len(employees)
-        total_users = data.get("total_user_credentials") or len(users)
+        # Community endpoint returns `employees`/`users` as int COUNTS; the paid
+        # Cavalier endpoint returns them as record LISTS. Handle both.
+        employees = data.get("employees")
+        users = data.get("users")
+        emp_list = employees if isinstance(employees, list) else []
+        usr_list = users if isinstance(users, list) else []
 
-        if total_employees == 0 and total_users == 0:
+        total_employees = data.get("total_corporate_credentials")
+        if total_employees is None:
+            total_employees = employees if isinstance(employees, int) else len(emp_list)
+        total_users = data.get("total_user_credentials")
+        if total_users is None:
+            total_users = users if isinstance(users, int) else len(usr_list)
+
+        if not total_employees and not total_users:
             return {"hudsonrock_exposed": False, "domain": domain}
 
-        # Extract malware families from exposures
+        # Extract malware families: community gives a `stealerFamilies` dict
+        # (family -> count); paid gives per-record malware fields.
         malware_families: list[str] = []
-        for emp in employees[:20]:
-            mf = emp.get("malware_path") or emp.get("malware_family") or ""
-            if mf and mf not in malware_families:
-                malware_families.append(mf)
+        sf = data.get("stealerFamilies")
+        if isinstance(sf, dict):
+            malware_families = [k for k in sf.keys() if k.lower() != "total"]
+        else:
+            for emp in emp_list[:20]:
+                mf = emp.get("malware_path") or emp.get("malware_family") or ""
+                if mf and mf not in malware_families:
+                    malware_families.append(mf)
 
         return {
             "hudsonrock_exposed": True,
             "domain": domain,
             "corporate_credentials_exposed": total_employees,
             "user_credentials_exposed": total_users,
+            "third_parties_exposed": data.get("third_parties"),
+            "last_employee_compromised": data.get("last_employee_compromised"),
+            "last_user_compromised": data.get("last_user_compromised"),
             "malware_families": malware_families[:5],
             "sample_employees": [
                 {
@@ -81,7 +98,7 @@ class HudsonRockConnector(BaseConnector):
                     "malware": emp.get("malware_path") or emp.get("malware_family") or "",
                     "date_compromised": emp.get("date_uploaded") or emp.get("date_compromised") or "",
                 }
-                for emp in employees[:5]
+                for emp in emp_list[:5]
             ],
         }
 
@@ -95,9 +112,10 @@ class HudsonRockConnector(BaseConnector):
                     headers={"Authorization": f"Bearer {settings.hudsonrock_api_key}"},
                 )
             else:
+                # Community endpoint is search-by-email (param `email`), not search-by-username.
                 resp = await self.http.get(
-                    f"{COMMUNITY_BASE}/search-by-username",
-                    params={"username": email},
+                    f"{COMMUNITY_BASE}/search-by-email",
+                    params={"email": email},
                 )
             resp.raise_for_status()
             data = resp.json()
@@ -105,15 +123,25 @@ class HudsonRockConnector(BaseConnector):
             self.logger.error(f"HudsonRock enrich email {email}: {e}")
             return None
 
-        credentials = data.get("credentials") or []
-        total = data.get("total") or len(credentials)
+        # Community: {message, stealers:[...], total_corporate_services, total_user_services}
+        # Paid:      {credentials:[...], total}
+        stealers = data.get("credentials")
+        if not isinstance(stealers, list):
+            stealers = data.get("stealers") or []
+        total = data.get("total")
+        if total is None:
+            total = (data.get("total_corporate_services", 0) or 0) + \
+                    (data.get("total_user_services", 0) or 0)
+        if not total and stealers:
+            total = len(stealers)
 
-        if total == 0:
+        if not total:
             return {"hudsonrock_exposed": False, "email": email}
 
         malware_families = list({
-            c.get("malware_path") or c.get("malware_family") or ""
-            for c in credentials if c.get("malware_path") or c.get("malware_family")
+            c.get("stealer_family") or c.get("malware_path") or c.get("malware_family") or ""
+            for c in stealers if isinstance(c, dict) and
+            (c.get("stealer_family") or c.get("malware_path") or c.get("malware_family"))
         })
 
         return {
@@ -125,9 +153,10 @@ class HudsonRockConnector(BaseConnector):
                 {
                     "url": c.get("url", ""),
                     "username": c.get("username", ""),
-                    "malware": c.get("malware_path") or c.get("malware_family") or "",
+                    "malware": (c.get("stealer_family") or c.get("malware_path")
+                                or c.get("malware_family") or ""),
                     "date_compromised": c.get("date_uploaded") or c.get("date_compromised") or "",
                 }
-                for c in credentials[:5]
+                for c in stealers[:5] if isinstance(c, dict)
             ],
         }
