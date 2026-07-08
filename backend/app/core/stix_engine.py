@@ -354,7 +354,7 @@ class STIXEngine:
             must.append({
                 "multi_match": {
                     "query": query,
-                    "fields": ["victim_name^3", "victim_domain^2", "group_name^2", "email", "domain"],
+                    "fields": ["victim_name^3", "victim_domain^2", "group_name^2", "email", "domain", "text"],
                 }
             })
         if filters:
