@@ -1,10 +1,10 @@
 # Web framework
 fastapi==0.139.0
-uvicorn[standard]==0.50.0
+uvicorn[standard]==0.51.0
 python-multipart==0.0.32
 
 # GraphQL
-strawberry-graphql[fastapi]==0.320.1
+strawberry-graphql[fastapi]==0.320.4
 
 # Database - PostgreSQL
 sqlalchemy==2.0.51
@@ -20,7 +20,7 @@ redis==8.0.1
 hiredis==3.4.0
 
 # RabbitMQ
-aio-pika==9.6.2
+aio-pika==10.0.1
 
 # MinIO
 minio==7.2.20
