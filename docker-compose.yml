@@ -159,15 +159,21 @@ services:
 
   # ── Tor Proxy (dark web connectors) ─────────────────────────
   tor:
-    image: dperson/torproxy:latest
+    # Was dperson/torproxy:latest — abandoned since 2020, and its Tor grew too old to
+    # validate a current consensus ("Consensus not signed by sufficient number of requested
+    # authorities"), so it never got past Bootstrapped 30%. Built from Alpine's tor instead.
+    build:
+      context: ./docker/tor
     restart: unless-stopped
     # No host port publish: socint services reach Tor over the internal
     # docker network as `tor:9050` (TOR_PROXY). Publishing 9050 on the host
     # collides with the host tor.service that the onion scrapers use, which
     # made socint fail to start after a reboot. Keep Tor internal-only.
+    #
+    # 8118 (privoxy) is gone: only the old image's healthcheck used it. Every consumer
+    # — sdk/base.py, leaksites.py — speaks SOCKS5 to :9050.
     expose:
       - "9050"
-      - "8118"
     networks: [socint]
 
 volumes:

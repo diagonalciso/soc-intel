@@ -1,0 +1,18 @@
+# Bind SOCKS on all interfaces so other containers on the socint network can reach it.
+# The port is only ever published inside the compose network — never mapped to the host.
+SocksPort 0.0.0.0:9050
+# 127.0.0.1 is required: the HEALTHCHECK runs inside this container and dials the SOCKS port
+# over loopback. Omitting it gets "Denying socks connection from untrusted address 127.0.0.1"
+# and the container reports unhealthy while Tor is in fact working perfectly.
+SocksPolicy accept 127.0.0.1
+SocksPolicy accept 172.16.0.0/12
+SocksPolicy accept 192.168.0.0/16
+SocksPolicy reject *
+
+DataDirectory /var/lib/tor
+
+# Client only. Never relay other people's traffic.
+ClientOnly 1
+ExitRelay 0
+
+Log notice stdout
