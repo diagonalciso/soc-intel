@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
@@ -94,6 +95,14 @@ class Settings(BaseSettings):
     tg_api_hash: str = ""             # from https://my.telegram.org/apps
     tg_session: str = ""              # StringSession — run generate_tg_session.py
     tg_cti_channels: str = ""         # comma-separated: darkwebinformer,H4ckManac,vxunderground
+
+    @field_validator("tg_api_id", mode="before")
+    @classmethod
+    def _blank_int_is_zero(cls, v: object) -> object:
+        # An unset "TG_API_ID=" in .env arrives as "" — treat as disabled, not a fatal parse error.
+        if isinstance(v, str) and not v.strip():
+            return 0
+        return v
 
     class Config:
         env_file = ".env"
