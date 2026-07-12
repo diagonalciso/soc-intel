@@ -1,5 +1,7 @@
 # SOCINT
 
+> Open Source cyber intelligence hub
+
 **Unified, self-hosted Cyber Threat Intelligence platform.**
 
 SOCINT combines indicator management, dark web tracking, case management, enrichment, detection rule management, and a connector framework into a single Docker Compose deployment — replacing OpenCTI + MISP + TheHive + Cortex.
