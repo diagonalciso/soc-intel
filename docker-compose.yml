@@ -177,11 +177,23 @@ services:
     networks: [socint]
 
 volumes:
+  # Names are pinned explicitly. Without `name:`, Compose prefixes each volume with the
+  # *project* name, which is derived from the directory. The 2026-07-06 soc-* rename moved
+  # the project from `socint` to `soc-intel`, so Compose created a new empty
+  # soc-intel_opensearch_data, OpenSearch started with zero documents and the connectors
+  # re-ingested from scratch. Nothing errored; ~390k STIX docs were simply stranded in the
+  # orphaned volume. Pinning the names means renaming the directory can never do that again.
+  # These values match the volumes that exist today — do not "tidy" them.
   opensearch_data:
+    name: soc-intel_opensearch_data
   postgres_data:
+    name: soc-intel_postgres_data
   redis_data:
+    name: soc-intel_redis_data
   rabbitmq_data:
+    name: soc-intel_rabbitmq_data
   minio_data:
+    name: soc-intel_minio_data
 
 networks:
   socint:
