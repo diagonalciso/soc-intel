@@ -19,6 +19,8 @@ updates:
       pip-be:
         patterns: ["*"]
   - package-ecosystem: npm
+    cooldown:
+      default-days: 14
     directory: "/frontend"
     schedule:
       interval: weekly
