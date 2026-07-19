@@ -1,10 +1,10 @@
 # Web framework
-fastapi==0.139.0
+fastapi==0.139.2
 uvicorn[standard]==0.51.0
 python-multipart==0.0.32
 
 # GraphQL
-strawberry-graphql[fastapi]==0.320.4
+strawberry-graphql[fastapi]==0.321.1
 
 # Database - PostgreSQL
 sqlalchemy==2.0.51
